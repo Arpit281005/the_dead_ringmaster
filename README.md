@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Carnival of Lies
 
-## Getting Started
+A mobile-first web app for a live, campus-wide detective hunt. Built from
+[carnival-of-lies-build-prompt.md](./carnival-of-lies-build-prompt.md).
 
-First, run the development server:
+This build covers the **core player loop**: team registration, the Midway map,
+QR/manual scanning, testimony + verdict + mirror-riddle resolution, the
+dead-end/decoy penalty path, the deduction board, and the accusation + reveal.
+The organiser admin dashboard, PWA offline queue, spectator screen, and
+HMAC-signed QR tokens from the full spec are **not** built yet — see
+"What's not built" below.
+
+## Stack
+
+- Next.js 16 (App Router, Server Actions)
+- Prisma + SQLite (local dev database — swap the datasource for Postgres/Supabase to deploy)
+- Tailwind CSS + Framer Motion
+- `html5-qrcode` for camera scanning, with a manual code-entry fallback
+- `qrcode` for generating QR images on the dev helper page
+
+## Running it
 
 ```bash
+npm install
+npx prisma migrate dev   # creates prisma/dev.db
+npx prisma db seed       # loads suspects, nodes, decoys, testimonies
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing the hunt without printed QR codes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Visit `/dev/qr` for a page listing every node's location, QR image, and raw
+token — scan them with a phone camera pointed at the screen, or copy the
+token into the scanner's manual-entry field. This is a testing helper, not
+the organiser print sheet from the spec.
 
-## Learn More
+## How the story data works
 
-To learn more about Next.js, take a look at the following resources:
+All narrative content (testimonies, riddles, mirrored riddles, decoy
+passages, suspects, Mark violations) lives in [prisma/seed.ts](./prisma/seed.ts).
+Edit it and re-run `npx prisma db seed` to change the story, swap in a real
+campus map, or set a different murderer.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The murderer is fixed as **Ostrin the Puppeteer** per the spec's default. His
+node never grants a suspect clearance regardless of verdict — that's
+intentional, not a bug.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Game logic notes
 
-## Deploy on Vercel
+- **Riddle mechanic**: each node stores one plain riddle and one mirrored
+  riddle. The app shows `riddlePlain` if the team says TRUTH, `riddleMirrored`
+  if they say LIE — regardless of whether that verdict is correct. Because of
+  how the content is authored, the *correct* verdict's reading always points
+  to the real next tent, and the incorrect one points to that node's decoy.
+- **Wrong verdicts don't lock a team out.** They cost a scan at the paired
+  decoy tent (+5 min penalty) and a themed "misled" passage, after which the
+  team can submit a fresh verdict for the same testimony. This matches the
+  source spec ("does not reveal the answer — they must re-submit the verdict
+  in-app").
+- **Sequence enforcement** is server-side only: every scan and verdict is
+  validated against `team.currentIndex` via Server Actions, and future
+  testimony/riddle text is never sent to the client before a valid scan.
+  Tokens are opaque random strings rather than HMAC-signed payloads (the full
+  spec's signing scheme was out of scope for this pass).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## What's not built (see the build prompt for full detail)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- teaAdmin dashboard (live m table, manual unstick, pause/resume, broadcast, CSV export)
+- Organiser QR print sheet (A4 layout with volunteer instructions)
+- Leaderboard and spectator screen
+- PWA / offline scan queue
+- HMAC-signed QR payloads, rate limiting, geofencing
+- Carnival Tokens, Madame Vireya's side tent, the Fortune Card share image, volunteer word
+- Deployment to Vercel / Supabase (currently local SQLite only)
