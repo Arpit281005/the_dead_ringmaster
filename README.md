@@ -71,6 +71,10 @@ intentional, not a bug.
 - **Riddle mechanic**: the app shows the plain riddle if the team says TRUTH,
   the mirrored riddle if they say LIE. The *correct* choice always points to
   the next story tent; the incorrect choice points to that team's seeded decoy.
+  **Act I** reveals the final reading immediately. **Act II+** shows a two-step
+  cipher (keyed Caesar, then mirror style); teams must enter a volunteer word
+  or Case Note cipher stamp via Unlock before the location text is readable.
+  Volunteer/admin cheat sheet: `/dev/riddle-keys` (dev only).
 - **Wrong verdicts don't lock a team out.** They cost a scan at the seeded
   decoy tent (+5 min penalty) and a themed "misled" passage, after which the
   team can submit a fresh verdict for the same testimony.

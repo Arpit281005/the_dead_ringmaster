@@ -80,14 +80,16 @@ model Scan {
 }
 
 model Verdict {
-  id          String   @id @default(cuid())
-  teamId      String
-  team        Team     @relation(fields: [teamId], references: [id])
-  nodeId      String
-  node        Node     @relation(fields: [nodeId], references: [id])
-  choice      String // TRUTH | LIE
-  wasCorrect  Boolean
-  submittedAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  teamId         String
+  team           Team     @relation(fields: [teamId], references: [id])
+  nodeId         String
+  node           Node     @relation(fields: [nodeId], references: [id])
+  choice         String // TRUTH | LIE
+  wasCorrect     Boolean
+  /** Act II+: true once unlockRiddle accepted the on-site cipher key. */
+  riddleUnlocked Boolean  @default(false)
+  submittedAt    DateTime @default(now())
 }
 
 model Clearance {
@@ -120,6 +122,7 @@ model TeamFact {
   team                 Team     @relation(fields: [teamId], references: [id])
   factKey              String
   text                 String
+  cipherKey            String?
   sourceSequenceIndex  Int
   createdAt            DateTime @default(now())
 

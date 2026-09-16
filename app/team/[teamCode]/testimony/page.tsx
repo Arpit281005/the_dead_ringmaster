@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getTeamState, getNodeTestimony } from "@/lib/state";
+import { getTeamState, getNodeTestimony, getPendingRiddleUnlock } from "@/lib/state";
 import VerdictPanel from "@/components/VerdictPanel";
 
 export default async function TestimonyPage({
@@ -20,6 +20,11 @@ export default async function TestimonyPage({
   const node = await getNodeTestimony(teamCode, current.id);
   if (!node) notFound();
 
+  const pendingUnlock =
+    "awaitingRiddleUnlock" in state && state.awaitingRiddleUnlock
+      ? await getPendingRiddleUnlock(teamCode, current.id)
+      : null;
+
   return (
     <main className="flex-1 px-5 py-8 max-w-md mx-auto w-full">
       <VerdictPanel
@@ -28,7 +33,8 @@ export default async function TestimonyPage({
         suspectName={node.suspectName}
         locationName={node.locationName}
         testimonyText={node.testimonyText}
-        retrying={Boolean(state.lastVerdict && !state.lastVerdict.wasCorrect)}
+        retrying={Boolean(state.lastVerdict && !state.lastVerdict.wasCorrect && !pendingUnlock)}
+        initialResult={pendingUnlock}
       />
     </main>
   );

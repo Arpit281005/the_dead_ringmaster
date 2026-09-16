@@ -13,7 +13,14 @@ export type MarkVariant = {
 export type EmittedFact = {
   key: string;
   text: string;
+  /** Short uppercase token stamped on Case Notes for Act II+ riddle unlock. */
+  cipherKey?: string;
 };
+
+export type KeySource =
+  | null
+  | { type: "volunteer_word" }
+  | { type: "earlier_node_fact"; factKey: string };
 
 export type StoryNodeTemplate = {
   sequenceIndex: number;
@@ -34,6 +41,10 @@ export type StoryNodeTemplate = {
   emitsFact: EmittedFact | null;
   /** Act III specials may fix truth; default seeded. */
   truthPolicy?: TruthPolicy;
+  /** Act I: null. Act II+: volunteer word or earlier Case Note cipher key. */
+  keySource: KeySource;
+  /** Server-only volunteer word when keySource.type === volunteer_word. */
+  volunteerWord?: string;
 };
 
 export type DecoyRef = {
@@ -47,12 +58,21 @@ export type ResolvedNodeContent = {
   isTruthful: boolean;
   brokenMark: BrokenMark;
   testimonyText: string;
+  /** Final plaintext (Act I) or stage1 cipher (Act II+). */
   riddlePlain: string;
   riddleMirrored: string;
+  /** Plaintext next/decoy before Act II+ encoding — server unlock only. */
+  riddlePlaintextPlain: string;
+  riddlePlaintextMirrored: string;
   mirrorStyle: MirrorStyle;
   clearReason: string | null;
   decoyNodeId: string;
   decoyLocationName: string;
   dependsOnFactKeys: string[];
   emitsFact: EmittedFact | null;
+  needsKey: boolean;
+  keySource: KeySource;
+  /** Resolved key string for encode/verify — never send to client. */
+  cipherKey: string | null;
+  keyPrompt: string | null;
 };

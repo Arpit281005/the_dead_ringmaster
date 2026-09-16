@@ -7,6 +7,7 @@ import { verifySignedQrPayload } from "@/lib/qr-token";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { deriveTeamSeed } from "@/lib/team-seed";
 import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
+import { normalizeCipherKey } from "@/lib/node-content/riddle-cipher";
 import { customAlphabet } from "nanoid";
 
 const DECOY_PENALTY_SECONDS = 5 * 60;
@@ -203,6 +204,8 @@ type VerdictResult = {
   clearedSuspectName: string | null;
   advanced: boolean;
   huntComplete: boolean;
+  needsKey: boolean;
+  keyPrompt: string | null;
 };
 
 export async function submitVerdict(
@@ -227,7 +230,13 @@ export async function submitVerdict(
     where: { teamId: team.id, nodeId: node.id },
     orderBy: { submittedAt: "desc" },
   });
+  if (lastVerdict?.wasCorrect) {
+    return { ok: false, error: "Unlock the cipher before you leave this tent." };
+  }
   if (lastVerdict && !lastVerdict.wasCorrect) {
+    if (!lastVerdict.riddleUnlocked && node.sequenceIndex >= 3) {
+      return { ok: false, error: "Unlock the cipher before you leave this tent." };
+    }
     const decoyScan = await prisma.scan.findFirst({
       where: {
         teamId: team.id,
@@ -276,11 +285,15 @@ export async function submitVerdict(
         where: {
           teamId_factKey: { teamId: team.id, factKey: resolved.emitsFact.key },
         },
-        update: { text: resolved.emitsFact.text },
+        update: {
+          text: resolved.emitsFact.text,
+          cipherKey: resolved.emitsFact.cipherKey ?? null,
+        },
         create: {
           teamId: team.id,
           factKey: resolved.emitsFact.key,
           text: resolved.emitsFact.text,
+          cipherKey: resolved.emitsFact.cipherKey ?? null,
           sourceSequenceIndex: node.sequenceIndex,
         },
       });
@@ -303,13 +316,107 @@ export async function submitVerdict(
       clearedSuspectName = node.suspect?.name ?? null;
     }
 
-    const nextIndex = node.sequenceIndex + 1;
-    await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
-    advanced = true;
-    huntComplete = nextIndex >= TOTAL_STORY_NODES;
+    // Act II+: do not advance Midway until riddle is unlocked with the on-site key.
+    if (!resolved.needsKey) {
+      const nextIndex = node.sequenceIndex + 1;
+      await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
+      advanced = true;
+      huntComplete = nextIndex >= TOTAL_STORY_NODES;
+    }
   }
 
-  return { ok: true, data: { wasCorrect, riddle, clearedSuspectName, advanced, huntComplete } };
+  return {
+    ok: true,
+    data: {
+      wasCorrect,
+      riddle,
+      clearedSuspectName,
+      advanced,
+      huntComplete,
+      needsKey: resolved.needsKey,
+      keyPrompt: resolved.keyPrompt,
+    },
+  };
+}
+
+type UnlockResult = {
+  riddle: string;
+  advanced: boolean;
+  huntComplete: boolean;
+  clearedSuspectName: string | null;
+};
+
+export async function unlockRiddle(
+  teamCode: string,
+  nodeId: string,
+  rawKey: string
+): Promise<ActionResult<UnlockResult>> {
+  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  if (!team) return { ok: false, error: "Team not found." };
+
+  const rate = checkRateLimit(`unlock:${team.id}`, { limit: 20, windowMs: 60_000 });
+  if (!rate.allowed) {
+    return { ok: false, error: "Too many cipher attempts — wait a moment." };
+  }
+
+  const node = await prisma.node.findUnique({ where: { id: nodeId }, include: { suspect: true } });
+  if (!node || node.isDecoy) return { ok: false, error: "Riddle not found." };
+  if (node.sequenceIndex !== team.currentIndex) {
+    return { ok: false, error: "This tent's cipher is no longer in play." };
+  }
+
+  const lastVerdict = await prisma.verdict.findFirst({
+    where: { teamId: team.id, nodeId: node.id },
+    orderBy: { submittedAt: "desc" },
+  });
+  if (!lastVerdict) {
+    return { ok: false, error: "Render a verdict before unlocking the riddle." };
+  }
+
+  const resolved = await resolveForTeam(team.teamSeed, node.sequenceIndex);
+  if (!resolved.needsKey || !resolved.cipherKey) {
+    return { ok: false, error: "This tent needs no cipher key." };
+  }
+
+  const offered = normalizeCipherKey(rawKey);
+  const expected = normalizeCipherKey(resolved.cipherKey);
+  if (!offered || offered !== expected) {
+    return { ok: false, error: "That cipher word does not open this tent's reading." };
+  }
+
+  const plaintext =
+    lastVerdict.choice === "TRUTH"
+      ? resolved.riddlePlaintextPlain
+      : resolved.riddlePlaintextMirrored;
+
+  if (!lastVerdict.riddleUnlocked) {
+    await prisma.verdict.update({
+      where: { id: lastVerdict.id },
+      data: { riddleUnlocked: true },
+    });
+  }
+
+  let advanced = false;
+  let huntComplete = false;
+  let clearedSuspectName: string | null = null;
+
+  if (lastVerdict.wasCorrect) {
+    // Advance only once, on successful unlock after a correct verdict.
+    if (team.currentIndex === node.sequenceIndex) {
+      const nextIndex = node.sequenceIndex + 1;
+      await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
+      advanced = true;
+      huntComplete = nextIndex >= TOTAL_STORY_NODES;
+    }
+    if (resolved.clearReason && node.suspect) {
+      clearedSuspectName = node.suspect.name;
+    }
+  }
+
+  return {
+    ok: true,
+    data: { riddle: plaintext, advanced, huntComplete, clearedSuspectName },
+  };
 }
 
 export async function updateTeamNote(

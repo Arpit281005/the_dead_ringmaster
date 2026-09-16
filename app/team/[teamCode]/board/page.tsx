@@ -55,7 +55,14 @@ export default async function BoardPage({
               {facts.map((f) => (
                 <li key={f.id} className="flex gap-2">
                   <span className="text-gold shrink-0">✦</span>
-                  <span>{f.text}</span>
+                  <span>
+                    {f.text}
+                    {f.cipherKey && (
+                      <span className="ink-stamp font-chrome text-[10px] uppercase ml-2 px-1.5 py-0.5 rounded-sm inline-block align-middle">
+                        Cipher: {f.cipherKey}
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

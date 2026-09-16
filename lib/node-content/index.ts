@@ -1,4 +1,4 @@
-export { resolveNodeContent } from "./resolve";
+export { resolveNodeContent, getExpectedCipherKey } from "./resolve";
 export { getTemplate, STORY_TEMPLATES } from "./templates";
 export type {
   ResolvedNodeContent,
@@ -9,4 +9,5 @@ export type {
   DecoyPoolId,
   EmittedFact,
   TruthPolicy,
+  KeySource,
 } from "./types";

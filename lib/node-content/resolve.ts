@@ -1,47 +1,27 @@
 import { seededRng } from "@/lib/seeded-rng";
-import { getTemplate } from "./templates";
-import type { DecoyRef, MirrorStyle, ResolvedNodeContent } from "./types";
+import { getTemplate, STORY_TEMPLATES } from "./templates";
+import { applyMirrorStyle, encodeStage1 } from "./riddle-cipher";
+import type { DecoyRef, KeySource, ResolvedNodeContent } from "./types";
 
-function applyMirrorStyle(text: string, style: MirrorStyle): string {
-  switch (style) {
-    case "reversed":
-      return text.split(/\s+/).reverse().join(" ");
-    case "directional":
-      return text
-        .replace(/\beast\b/gi, "⟦W⟧")
-        .replace(/\bwest\b/gi, "east")
-        .replace(/⟦W⟧/g, "west")
-        .replace(/\bnorth\b/gi, "⟦S⟧")
-        .replace(/\bsouth\b/gi, "north")
-        .replace(/⟦S⟧/g, "south")
-        .replace(/\bhighest\b/gi, "⟦L⟧")
-        .replace(/\blowest\b/gi, "highest")
-        .replace(/⟦L⟧/g, "lowest");
-    case "negation":
-      return text
-        .replace(/\bwhere\b/gi, "where no")
-        .replace(/\bfind\b/gi, "do not find")
-        .replace(/\bseek\b/gi, "do not seek");
-    case "antonym":
-      return text
-        .replace(/\bbrightest\b/gi, "⟦D⟧")
-        .replace(/\bdimmest\b/gi, "brightest")
-        .replace(/⟦D⟧/g, "dimmest")
-        .replace(/\bemptiest\b/gi, "⟦F⟧")
-        .replace(/\bfullest\b/gi, "emptiest")
-        .replace(/⟦F⟧/g, "fullest")
-        .replace(/\bhighest\b/gi, "⟦L⟧")
-        .replace(/\blowest\b/gi, "highest")
-        .replace(/⟦L⟧/g, "lowest");
-    default:
-      return text;
+function resolveCipherKey(keySource: KeySource, volunteerWord?: string): string | null {
+  if (!keySource) return null;
+  if (keySource.type === "volunteer_word") {
+    return volunteerWord?.toUpperCase() ?? null;
   }
+  const emitter = STORY_TEMPLATES.find((t) => t.emitsFact?.key === keySource.factKey);
+  return emitter?.emitsFact?.cipherKey?.toUpperCase() ?? null;
+}
+
+function keyPromptFor(keySource: KeySource): string | null {
+  if (!keySource) return null;
+  if (keySource.type === "volunteer_word") {
+    return "Ask the tent volunteer for the cipher word.";
+  }
+  return "Use the cipher word stamped on your Case Notes.";
 }
 
 /**
  * Pure server-side resolver. Never import from Client Components.
- * `isTruthful`, Mark detail, riddles, and decoy selection all depend on teamSeed
- * (unless truthPolicy fixes Act III specials).
  */
 export function resolveNodeContent(
   sequenceIndex: number,
@@ -75,14 +55,34 @@ export function resolveNodeContent(
   const decoyHint = rng.pick(decoyHintOptions);
   const mirrorStyle = rng.pick(template.mirrorStyles);
 
+  // Choice routing (plaintext): TRUTH choice shows riddlePlain; LIE shows riddleMirrored.
+  // Correct choice always yields nextHint; wrong yields decoyHint.
+  let plaintextPlain: string;
+  let plaintextMirrored: string;
+  if (isTruthful) {
+    plaintextPlain = nextHint;
+    plaintextMirrored = decoyHint;
+  } else {
+    plaintextPlain = decoyHint;
+    plaintextMirrored = nextHint;
+  }
+
+  const needsKey = sequenceIndex >= 3 && template.keySource !== null;
+  const cipherKey = needsKey
+    ? resolveCipherKey(template.keySource, template.volunteerWord)
+    : null;
+
   let riddlePlain: string;
   let riddleMirrored: string;
-  if (isTruthful) {
-    riddlePlain = nextHint;
-    riddleMirrored = applyMirrorStyle(decoyHint, mirrorStyle);
+
+  if (needsKey && cipherKey) {
+    // Act II+: both branches are stage1 = mirror(keyedObfuscate(plaintext))
+    riddlePlain = encodeStage1(plaintextPlain, cipherKey, mirrorStyle);
+    riddleMirrored = encodeStage1(plaintextMirrored, cipherKey, mirrorStyle);
   } else {
-    riddlePlain = decoyHint;
-    riddleMirrored = applyMirrorStyle(nextHint, mirrorStyle);
+    // Act I: plain as-is; mirrored branch applies mirror style to its plaintext payload
+    riddlePlain = plaintextPlain;
+    riddleMirrored = applyMirrorStyle(plaintextMirrored, mirrorStyle);
   }
 
   return {
@@ -92,11 +92,23 @@ export function resolveNodeContent(
     testimonyText,
     riddlePlain,
     riddleMirrored,
+    riddlePlaintextPlain: plaintextPlain,
+    riddlePlaintextMirrored: plaintextMirrored,
     mirrorStyle,
     clearReason: template.clearReason,
     decoyNodeId: decoy.id,
     decoyLocationName: decoy.locationName,
     dependsOnFactKeys: template.dependsOnFactKeys,
     emitsFact: template.emitsFact,
+    needsKey,
+    keySource: template.keySource,
+    cipherKey,
+    keyPrompt: keyPromptFor(template.keySource),
   };
+}
+
+/** Look up the expected cipher key for a node (server unlock / admin). */
+export function getExpectedCipherKey(sequenceIndex: number): string | null {
+  const template = getTemplate(sequenceIndex);
+  return resolveCipherKey(template.keySource, template.volunteerWord);
 }

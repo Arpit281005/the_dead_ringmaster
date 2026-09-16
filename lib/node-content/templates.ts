@@ -11,6 +11,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     decoyPool: "act1",
     dependsOnFactKeys: [],
     emitsFact: null,
+    keySource: null,
     testimonyFrame: `They will tell you I read palms for coin and call it prophecy. Perhaps. But I read Orlan's hand three summers running, and I will swear to what I know. {{MARK_CLAUSE}} I heard no quarrel, saw no shadow cross the chained west gate — how could I, chained as it was since dusk? Orlan mocked my cards last week, called them a parlour trick, and I forgave him for it, the way you forgive a child. I did not love him. I did not kill him either. Ask the wax. Ask the rain. Ask the silence after the bell.`,
     truthfulVariants: [
       {
@@ -73,6 +74,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     decoyPool: "act1",
     dependsOnFactKeys: [],
     emitsFact: null,
+    keySource: null,
     testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The bell rang its hours, the rain fell, the gate stayed chained — I know because I checked it myself, twice, out of nothing but boredom. When the generator failed I lit a candle and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the big top. Ask anyone. Ask no one. It hardly matters which.`,
     truthfulVariants: [
       {
@@ -132,7 +134,9 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     emitsFact: {
       key: "quill_gate_chained",
       text: "The west gate stayed chained from dusk; Quill never opened it.",
+      cipherKey: "CHAIN",
     },
+    keySource: null,
     testimonyFrame: `I counted them in — three by three, family by family, laugh by laugh — one hundred and eighty-one souls through my gate before the rain began. I have never lost count in eleven years and I did not lose it that night. {{MARK_CLAUSE}} Orlan trusted me with the coin box and I have never once shorted him a shilling. I saw the Painted Man cross the yard, I saw the twins arguing by their rig, I saw nothing of murder in any of it. The rain did not frighten me. The dark did not frighten me. Only the silence after, when the bell would not ring and no one would tell me why, frightened me enough to sit down on my own ticket stool and wait for someone braver than I am to go and look.`,
     truthfulVariants: [
       {
@@ -193,7 +197,10 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     emitsFact: {
       key: "bahri_pit_bandage",
       text: "Bahri's hands were bandaged from burns; he worked the fire pit from the rain through the generator's death.",
+      cipherKey: "BANDAGE",
     },
+    keySource: { type: "volunteer_word" },
+    volunteerWord: "CINDER",
     // Frame holds shared prose; Mark IV anchors live entirely in the clause.
     testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
     truthfulVariants: [
@@ -249,7 +256,9 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     emitsFact: {
       key: "duran_shed_shape",
       text: "A bandaged figure was seen at the generator shed after the bell died; Bahri was not that figure.",
+      cipherKey: "SHED",
     },
+    keySource: { type: "earlier_node_fact", factKey: "bahri_pit_bandage" },
     testimonyFrame: `Strength is a slow thing, people forget that. I do not move quick, I move certain — one lift, one plant, one hold, and the crowd forgets to breathe. {{MARK_CLAUSE}} Orlan came by once, asked if I'd lift the new frame myself and save him a labourer's wage. I said I would, for a fair cut. He laughed and walked off toward the big top, and that's the last true thing I know of him — walking, laughing, alive. I stayed with my ropes till the shouting started.`,
     truthfulVariants: [
       {
@@ -301,6 +310,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     decoyPool: "act2",
     dependsOnFactKeys: ["quill_gate_chained"],
     emitsFact: null,
+    keySource: { type: "earlier_node_fact", factKey: "quill_gate_chained" },
     testimonyFrame: `We are two who answer as one, always have been, since our mother taught us that a trapeze forgives no soloists. {{MARK_CLAUSE}} Orlan liked to watch us rehearse, said we were the only honest act in his carnival, which we always took as a joke he half meant. We were together the whole night. We are always together. That is the one truth in all of this.`,
     truthfulVariants: [
       {
@@ -357,7 +367,10 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     emitsFact: {
       key: "ostrin_stage_lamp",
       text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the big top before the rain.",
+      cipherKey: "LAMP",
     },
+    keySource: { type: "volunteer_word" },
+    volunteerWord: "STRING",
     // Red herring: appears to break Mark I / III on a careless read; always truthful.
     testimonyFrame: `{{MARK_CLAUSE}}`,
     truthfulVariants: [
@@ -398,6 +411,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     decoyPool: "act3",
     dependsOnFactKeys: ["duran_shed_shape", "ostrin_stage_lamp"],
     emitsFact: null,
+    keySource: { type: "earlier_node_fact", factKey: "ostrin_stage_lamp" },
     testimonyFrame: `I keep the gate when Quill sleeps, and that night neither of us slept at all. {{MARK_CLAUSE}} The chained gate never opened, I'd stake my post on it. Orlan crossed my line of sight only once that night, laughing, heading for the big top, and I never saw him walk back out. Make of that what you will. I only watch. I don't judge. But I know where the last lamp was burning, and I know who was standing under it.`,
     truthfulVariants: [
       {

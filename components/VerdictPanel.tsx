@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { submitVerdict } from "@/lib/actions";
+import { submitVerdict, unlockRiddle } from "@/lib/actions";
 import MarksReference from "@/components/MarksReference";
 
 type Choice = "TRUTH" | "LIE";
@@ -14,6 +14,8 @@ type Result = {
   clearedSuspectName: string | null;
   advanced: boolean;
   huntComplete: boolean;
+  needsKey: boolean;
+  keyPrompt: string | null;
 };
 
 export default function VerdictPanel({
@@ -23,6 +25,7 @@ export default function VerdictPanel({
   locationName,
   testimonyText,
   retrying,
+  initialResult = null,
 }: {
   teamCode: string;
   nodeId: string;
@@ -30,11 +33,16 @@ export default function VerdictPanel({
   locationName: string;
   testimonyText: string;
   retrying: boolean;
+  initialResult?: Result | null;
 }) {
   const router = useRouter();
   const [pendingChoice, setPendingChoice] = useState<Choice | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<Result | null>(initialResult);
+  const [unlocked, setUnlocked] = useState(false);
+  const [finalRiddle, setFinalRiddle] = useState<string | null>(null);
+  const [cipherInput, setCipherInput] = useState("");
+  const [unlocking, setUnlocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function confirm() {
@@ -49,10 +57,41 @@ export default function VerdictPanel({
       return;
     }
     setResult(res.data);
+    setUnlocked(!res.data.needsKey);
+    if (!res.data.needsKey) setFinalRiddle(res.data.riddle);
     setPendingChoice(null);
   }
 
+  async function unlock() {
+    if (!cipherInput.trim()) return;
+    setUnlocking(true);
+    setError(null);
+    const res = await unlockRiddle(teamCode, nodeId, cipherInput);
+    setUnlocking(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    setFinalRiddle(res.data.riddle);
+    setUnlocked(true);
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            riddle: res.data.riddle,
+            advanced: res.data.advanced,
+            huntComplete: res.data.huntComplete,
+            clearedSuspectName: res.data.clearedSuspectName ?? prev.clearedSuspectName,
+            needsKey: false,
+          }
+        : prev
+    );
+  }
+
   if (result) {
+    const showKeyGate = result.needsKey && !unlocked;
+    const displayRiddle = finalRiddle ?? result.riddle;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -66,54 +105,84 @@ export default function VerdictPanel({
             transition={{ type: "spring", stiffness: 260, damping: 14 }}
             className="ink-stamp font-chrome text-sm uppercase px-3 py-1 rounded-sm"
           >
-            {result.advanced ? "Accepted" : "Misjudged"}
+            {result.wasCorrect ? "Accepted" : "Misjudged"}
           </motion.span>
         </div>
 
         <div>
-          <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">The Riddle Reads</p>
-          <p className="font-display text-lg leading-snug">{result.riddle}</p>
+          <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">
+            {showKeyGate ? "The Cipher Reads" : "The Riddle Reads"}
+          </p>
+          <p className="font-display text-lg leading-snug break-words">{displayRiddle}</p>
         </div>
 
-        {result.clearedSuspectName && (
+        {showKeyGate && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-ink/70">{result.keyPrompt}</p>
+            <div className="flex gap-2">
+              <input
+                value={cipherInput}
+                onChange={(e) => setCipherInput(e.target.value)}
+                className="flex-1 border border-ink/30 bg-parchment px-3 py-3 rounded-sm font-chrome tracking-wide uppercase focus:outline-none focus:border-oxblood"
+                placeholder="Cipher word"
+                autoCapitalize="characters"
+                autoCorrect="off"
+              />
+              <button
+                type="button"
+                onClick={unlock}
+                disabled={unlocking || !cipherInput.trim()}
+                className="btn-oxblood font-chrome uppercase text-xs px-4 rounded-sm"
+              >
+                {unlocking ? "…" : "Unlock"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {error && <p className="text-oxblood text-sm">{error}</p>}
+
+        {unlocked && result.clearedSuspectName && (
           <p className="text-sm text-teal">
             <strong>{result.clearedSuspectName}</strong> is cleared.
           </p>
         )}
 
-        {!result.advanced && (
+        {unlocked && !result.advanced && !result.wasCorrect && (
           <p className="text-sm text-oxblood leading-relaxed">
             Something doesn&apos;t sit right. Follow the riddle — if it leads to a dead end, scan
             what you find there, then return and weigh the testimony again.
           </p>
         )}
 
-        <div className="flex flex-col gap-2">
-          {result.advanced && !result.huntComplete && (
-            <button
-              onClick={() => router.push(`/team/${teamCode}`)}
-              className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
-            >
-              Return to the Midway
-            </button>
-          )}
-          {result.advanced && result.huntComplete && (
-            <button
-              onClick={() => router.push(`/team/${teamCode}/accuse`)}
-              className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
-            >
-              Proceed to the Accusation
-            </button>
-          )}
-          {!result.advanced && (
-            <button
-              onClick={() => router.push(`/team/${teamCode}/scan`)}
-              className="btn-gold-outline font-chrome uppercase text-sm py-3 rounded-sm"
-            >
-              Go to Scanner
-            </button>
-          )}
-        </div>
+        {unlocked && (
+          <div className="flex flex-col gap-2">
+            {result.advanced && !result.huntComplete && (
+              <button
+                onClick={() => router.push(`/team/${teamCode}`)}
+                className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
+              >
+                Return to the Midway
+              </button>
+            )}
+            {result.advanced && result.huntComplete && (
+              <button
+                onClick={() => router.push(`/team/${teamCode}/accuse`)}
+                className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
+              >
+                Proceed to the Accusation
+              </button>
+            )}
+            {!result.advanced && (
+              <button
+                onClick={() => router.push(`/team/${teamCode}/scan`)}
+                className="btn-gold-outline font-chrome uppercase text-sm py-3 rounded-sm"
+              >
+                Go to Scanner
+              </button>
+            )}
+          </div>
+        )}
       </motion.div>
     );
   }
