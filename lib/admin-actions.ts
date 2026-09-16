@@ -3,9 +3,22 @@
 import { prisma } from "@/lib/db";
 import { requireAdmin, setAdminSession, clearAdminSession, verifyAdminSession } from "@/lib/admin-auth";
 import { getGameConfig } from "@/lib/admin-team-insight";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { TOTAL_STORY_NODES } from "@/lib/state";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+const ADMIN_LOGIN_RATE = { limit: 5, windowMs: 60_000 };
+const MAX_HINT = 500;
+const MAX_BROADCAST = 500;
+
+async function clientRateKey(prefix: string): Promise<string> {
+  const h = await headers();
+  const forwarded = h.get("x-forwarded-for");
+  const ip = (forwarded ? forwarded.split(",")[0]?.trim() : null) || h.get("x-real-ip") || "unknown";
+  return `${prefix}:${ip}`;
+}
 
 async function logAction(
   actionType: string,
@@ -23,7 +36,11 @@ async function logAction(
 }
 
 export async function adminLogin(password: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const ok = await setAdminSession(password);
+  const rate = checkRateLimit(await clientRateKey("admin-login"), ADMIN_LOGIN_RATE);
+  if (!rate.allowed) {
+    return { ok: false, error: "Too many attempts — wait a moment." };
+  }
+  const ok = await setAdminSession(password.slice(0, 200));
   if (!ok) return { ok: false, error: "Incorrect password." };
   return { ok: true };
 }
@@ -78,7 +95,7 @@ export async function grantOrganiserHint(teamCode: string, hint: string) {
   await requireAdmin();
   const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
   if (!team) return { ok: false as const, error: "Team not found." };
-  const text = hint.trim();
+  const text = hint.trim().slice(0, MAX_HINT);
   if (!text) return { ok: false as const, error: "Hint text required." };
   await prisma.team.update({
     where: { id: team.id },
@@ -136,7 +153,7 @@ export async function toggleGlobalPause() {
 
 export async function setBroadcast(message: string) {
   await requireAdmin();
-  const text = message.trim();
+  const text = message.trim().slice(0, MAX_BROADCAST);
   await prisma.gameConfig.update({
     where: { id: "singleton" },
     data: {

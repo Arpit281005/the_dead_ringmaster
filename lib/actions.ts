@@ -15,6 +15,8 @@ import {
 import { normalizeCipherKey } from "@/lib/node-content/riddle-cipher";
 import { ensureClientContext, touchTeamDevice, flagFastResolve } from "@/lib/device-binding";
 import { requireTeamByCode } from "@/lib/team-access";
+import { getGameConfig } from "@/lib/admin-team-insight";
+import { headers } from "next/headers";
 import { customAlphabet } from "nanoid";
 
 const DECOY_PENALTY_SECONDS = 5 * 60;
@@ -23,8 +25,33 @@ const ESCALATED_VERDICT_PENALTY_SECONDS = 10 * 60;
 const SCAN_RATE_LIMIT = { limit: 6, windowMs: 60_000 };
 const SCAN_NODE_MIN_INTERVAL_MS = 8_000;
 const VERDICT_RATE_LIMIT = { limit: 8, windowMs: 60_000 };
+const JOIN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
+const CREATE_RATE_LIMIT = { limit: 5, windowMs: 60_000 };
+
+const MAX_TEAM_NAME = 80;
+const MAX_MEMBER_NAME = 40;
+const MAX_MEMBERS = 10;
+const MAX_CONTACT = 80;
+const MAX_NOTE = 2000;
+const MAX_REASONING = 1000;
+const MAX_METHOD = 120;
+
 const codeDigits = customAlphabet("0123456789", 4);
 const NAME_WORDS = /[A-Za-z]+/g;
+
+const PAUSED_MSG = "The carnival is paused — wait for the organiser to resume.";
+
+async function assertGameNotPaused(): Promise<string | null> {
+  const config = await getGameConfig();
+  return config.isPaused ? PAUSED_MSG : null;
+}
+
+async function clientRateKey(prefix: string): Promise<string> {
+  const h = await headers();
+  const forwarded = h.get("x-forwarded-for");
+  const ip = (forwarded ? forwarded.split(",")[0]?.trim() : null) || h.get("x-real-ip") || "unknown";
+  return `${prefix}:${ip}`;
+}
 
 function generateTeamCode(name: string) {
   const words = name.match(NAME_WORDS) ?? ["VEX"];
@@ -66,9 +93,17 @@ export async function createTeam(input: {
   members: string[];
   contact: string;
 }): Promise<ActionResult<{ teamCode: string }>> {
-  const name = input.name.trim();
-  const members = input.members.map((m) => m.trim()).filter(Boolean);
-  const contact = input.contact.trim();
+  const createRate = checkRateLimit(await clientRateKey("create"), CREATE_RATE_LIMIT);
+  if (!createRate.allowed) {
+    return { ok: false, error: "Too many registrations — wait a moment." };
+  }
+
+  const name = input.name.trim().slice(0, MAX_TEAM_NAME);
+  const members = input.members
+    .map((m) => m.trim().slice(0, MAX_MEMBER_NAME))
+    .filter(Boolean)
+    .slice(0, MAX_MEMBERS);
+  const contact = input.contact.trim().slice(0, MAX_CONTACT);
 
   if (!name) return { ok: false, error: "Give your team a name." };
   if (members.length === 0) return { ok: false, error: "Add at least one member." };
@@ -99,7 +134,12 @@ export async function createTeam(input: {
 }
 
 export async function joinTeam(teamCodeInput: string): Promise<ActionResult<{ teamCode: string }>> {
-  const team = await requireTeamByCode(teamCodeInput.trim());
+  const joinRate = checkRateLimit(await clientRateKey("join"), JOIN_RATE_LIMIT);
+  if (!joinRate.allowed) {
+    return { ok: false, error: "Too many attempts — wait a moment." };
+  }
+
+  const team = await requireTeamByCode(teamCodeInput.trim().slice(0, 32));
   if (!team) return { ok: false, error: "No team carries that code. Check with your Notebook holder." };
 
   const ctx = await ensureClientContext();
@@ -119,6 +159,9 @@ type ScanResult =
  * Story re-scan: same state, no double row. Decoy re-scan: same passage, no double penalty.
  */
 export async function scanNode(teamCode: string, rawToken: string): Promise<ActionResult<ScanResult>> {
+  const paused = await assertGameNotPaused();
+  if (paused) return { ok: false, error: paused };
+
   const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
   if (team.status === "FINISHED") return { ok: false, error: "This team has already finished the hunt." };
@@ -262,6 +305,9 @@ export async function submitVerdict(
   nodeId: string,
   choice: "TRUTH" | "LIE"
 ): Promise<ActionResult<VerdictResult>> {
+  const paused = await assertGameNotPaused();
+  if (paused) return { ok: false, error: paused };
+
   const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
 
@@ -423,6 +469,9 @@ export async function unlockRiddle(
   nodeId: string,
   rawKey: string
 ): Promise<ActionResult<UnlockResult>> {
+  const paused = await assertGameNotPaused();
+  if (paused) return { ok: false, error: paused };
+
   const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
 
@@ -499,10 +548,12 @@ export async function updateTeamNote(
   const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
 
+  const trimmed = note.slice(0, MAX_NOTE);
+
   await prisma.teamNote.upsert({
     where: { teamId_suspectId: { teamId: team.id, suspectId } },
-    update: { note },
-    create: { teamId: team.id, suspectId, note },
+    update: { note: trimmed },
+    create: { teamId: team.id, suspectId, note: trimmed },
   });
 
   return { ok: true, data: null };
@@ -524,6 +575,9 @@ export async function submitAccusation(
   factKeyword: string,
   reasoning: string
 ): Promise<ActionResult<AccusationResult>> {
+  const paused = await assertGameNotPaused();
+  if (paused) return { ok: false, error: paused };
+
   const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
   if (team.currentIndex < TOTAL_STORY_NODES) {
@@ -535,11 +589,14 @@ export async function submitAccusation(
 
   const suspect = await prisma.suspect.findUnique({ where: { id: suspectId } });
   if (!suspect) return { ok: false, error: "Name a suspect from the board." };
-  if (!method.trim()) return { ok: false, error: "Name the method or weapon." };
-  if (!factKeyword.trim()) {
+  const methodTrim = method.trim().slice(0, MAX_METHOD);
+  const factTrim = factKeyword.trim().slice(0, 40);
+  const reasoningTrim = reasoning.trim().slice(0, MAX_REASONING);
+  if (!methodTrim) return { ok: false, error: "Name the method or weapon." };
+  if (!factTrim) {
     return { ok: false, error: "Choose the Case File fact that seals their guilt." };
   }
-  if (!reasoning.trim()) return { ok: false, error: "Give one sentence of reasoning." };
+  if (!reasoningTrim) return { ok: false, error: "Give one sentence of reasoning." };
 
   const cleared = await prisma.clearance.findFirst({
     where: { teamId: team.id, suspectId },
@@ -552,9 +609,9 @@ export async function submitAccusation(
   const expectations = getAccusationExpectations(team.teamSeed, decoys);
 
   const suspectCorrect = suspect.isMurderer;
-  const extractedMethod = extractMethodKeyword(method);
+  const extractedMethod = extractMethodKeyword(methodTrim);
   const methodCorrect = extractedMethod !== null && expectations.methodKeywords.has(extractedMethod);
-  const offeredFact = normalizeAccusationToken(factKeyword);
+  const offeredFact = normalizeAccusationToken(factTrim);
   const factCorrect = offeredFact === expectations.factKeyword;
   const wasCorrect = suspectCorrect;
 
@@ -564,9 +621,9 @@ export async function submitAccusation(
     data: {
       teamId: team.id,
       suspectId,
-      methodSubmitted: method.trim(),
+      methodSubmitted: methodTrim,
       factKeywordSubmitted: offeredFact,
-      reasoning: reasoning.trim(),
+      reasoning: reasoningTrim,
       wasCorrect,
       suspectCorrect,
       methodCorrect,

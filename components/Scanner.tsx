@@ -71,8 +71,17 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
           return;
         }
         runningRef.current = true;
-      } catch {
-        if (!cancelled) setCameraError("Camera unavailable — use the code below.");
+      } catch (err) {
+        if (!cancelled) {
+          const denied =
+            err instanceof DOMException &&
+            (err.name === "NotAllowedError" || err.name === "PermissionDeniedError");
+          setCameraError(
+            denied
+              ? "Camera permission denied — paste or type the tent code below."
+              : "Camera unavailable — paste or type the tent code below."
+          );
+        }
       }
     }
 

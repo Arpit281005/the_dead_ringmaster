@@ -5,7 +5,9 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 function csvEscape(v: string | number | boolean | null | undefined): string {
-  const s = v === null || v === undefined ? "" : String(v);
+  let s = v === null || v === undefined ? "" : String(v);
+  // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR)
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }

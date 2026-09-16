@@ -16,13 +16,24 @@ export default function LiveTimer({
   pausedSeconds?: number;
   isPaused?: boolean;
 }) {
+  // null until client tick — avoids SSR/client mismatch
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
-    setNow(Date.now());
-    if (finishedAtIso || isPaused) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setNow(Date.now());
+      if (finishedAtIso || isPaused) return;
+      intervalId = setInterval(() => setNow(Date.now()), 1000);
+    });
+
+    return () => {
+      cancelled = true;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [finishedAtIso, isPaused]);
 
   const startedAt = new Date(startedAtIso).getTime();

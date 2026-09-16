@@ -90,7 +90,10 @@ intentional, not a bug.
   `SecurityFlag`s for unknown device/IP and fast resolves (`Node.minExpectedSeconds`);
   review at `/dev/security-flags` (dev only). Page DTOs use `TeamPublic` (no
   `teamSeed`). **Postgres RLS is not on SQLite** — isolation is app-layer
-  `teamCode` → `teamId` filters via `lib/team-access.ts`.
+  `teamCode` → `teamId` filters via `lib/team-access.ts`. Treat `teamCode` as a
+  **bearer capability** (anyone with the code can act as that team). Global
+  pause freezes the UI clock **and** rejects scan / verdict / unlock / accuse
+  server-side.
 
 ### Hardening change log (vs requirements)
 
@@ -140,10 +143,12 @@ intentional, not a bug.
 ## Organiser admin
 
 Sign in at `/admin` with `ADMIN_PASSWORD` (dev default `carnival-dev-admin` if
-unset). Live team table, force-advance / void penalty / grant hint, global
+unset). Admin cookie is a **signed expiring session** (not a static password
+hash). Live team table, force-advance / void penalty / grant hint, global
 pause+broadcast, security flags (review only), per-team seeded variant + Case
 Notes + accusation readiness, QR print sheet (decoys by pool) at `/admin/print`,
 CSV at `/admin/export`. Mutations append to `AdminAction`; flag views do not.
+Join / admin login are rate-limited; long text fields are length-capped.
 
 ## Greenfield (not started — new schema + routes later)
 
