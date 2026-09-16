@@ -21,7 +21,7 @@ export default async function RulebookPage({
 
       <p className="italic text-ink/80 mb-8 leading-relaxed">{PREMISE}</p>
 
-      <h2 className="font-display text-xl font-bold mb-3">The Three Marks</h2>
+      <h2 className="font-display text-xl font-bold mb-3">The Four Marks</h2>
       <div className="flex flex-col gap-3 mb-8">
         {MARKS.map((m) => (
           <div key={m.title} className="paper-card rounded-sm p-4">

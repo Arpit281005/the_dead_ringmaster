@@ -13,6 +13,7 @@ const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 async function main() {
   console.log("Clearing existing data...");
   await prisma.accusation.deleteMany();
+  await prisma.teamFact.deleteMany();
   await prisma.teamNote.deleteMany();
   await prisma.clearance.deleteMany();
   await prisma.verdict.deleteMany();

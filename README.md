@@ -64,6 +64,10 @@ intentional, not a bug.
   `isTruthful`, Mark-bearing detail, riddle text, and a decoy from that node's
   act pool. Content is returned only after a valid scan (testimony page) or
   inside verdict/decoy Server Actions — never on Midway props for locked tents.
+- **Act II/III difficulty**: teams unlock **Case Notes** (`TeamFact`) on the
+  Deduction Board when they judge a tent correctly. Later tents may require
+  those notes (server-gated). Mark IV (The Reckoning) is taught in the Case
+  File up front; which tent uses which Mark is not.
 - **Riddle mechanic**: the app shows the plain riddle if the team says TRUTH,
   the mirrored riddle if they say LIE. The *correct* choice always points to
   the next story tent; the incorrect choice points to that team's seeded decoy.

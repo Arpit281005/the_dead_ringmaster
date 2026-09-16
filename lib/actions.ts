@@ -242,6 +242,23 @@ export async function submitVerdict(
   }
 
   const resolved = await resolveForTeam(team.teamSeed, node.sequenceIndex);
+
+  if (resolved.dependsOnFactKeys.length > 0) {
+    const have = await prisma.teamFact.findMany({
+      where: { teamId: team.id, factKey: { in: resolved.dependsOnFactKeys } },
+      select: { factKey: true },
+    });
+    const haveKeys = new Set(have.map((f) => f.factKey));
+    const missing = resolved.dependsOnFactKeys.filter((k) => !haveKeys.has(k));
+    if (missing.length > 0) {
+      return {
+        ok: false,
+        error:
+          "This tent will not yield to a lone reading — return to your Deduction Board and weigh what you have already proved.",
+      };
+    }
+  }
+
   const wasCorrect = (choice === "TRUTH") === resolved.isTruthful;
   const riddle = choice === "TRUTH" ? resolved.riddlePlain : resolved.riddleMirrored;
 
@@ -254,6 +271,21 @@ export async function submitVerdict(
   let huntComplete = false;
 
   if (wasCorrect) {
+    if (resolved.emitsFact) {
+      await prisma.teamFact.upsert({
+        where: {
+          teamId_factKey: { teamId: team.id, factKey: resolved.emitsFact.key },
+        },
+        update: { text: resolved.emitsFact.text },
+        create: {
+          teamId: team.id,
+          factKey: resolved.emitsFact.key,
+          text: resolved.emitsFact.text,
+          sourceSequenceIndex: node.sequenceIndex,
+        },
+      });
+    }
+
     if (resolved.clearReason && node.suspectId) {
       const already = await prisma.clearance.findFirst({
         where: { teamId: team.id, suspectId: node.suspectId },

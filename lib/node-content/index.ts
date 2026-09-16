@@ -7,4 +7,6 @@ export type {
   BrokenMark,
   MirrorStyle,
   DecoyPoolId,
+  EmittedFact,
+  TruthPolicy,
 } from "./types";

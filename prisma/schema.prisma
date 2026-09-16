@@ -64,6 +64,7 @@ model Team {
   verdicts       Verdict[]
   clearances     Clearance[]
   notes          TeamNote[]
+  facts          TeamFact[]
   accusation     Accusation?
 }
 
@@ -111,6 +112,18 @@ model TeamNote {
   updatedAt DateTime @updatedAt
 
   @@unique([teamId, suspectId])
+}
+
+model TeamFact {
+  id                   String   @id @default(cuid())
+  teamId               String
+  team                 Team     @relation(fields: [teamId], references: [id])
+  factKey              String
+  text                 String
+  sourceSequenceIndex  Int
+  createdAt            DateTime @default(now())
+
+  @@unique([teamId, factKey])
 }
 
 model Accusation {

@@ -40,7 +40,8 @@ function applyMirrorStyle(text: string, style: MirrorStyle): string {
 
 /**
  * Pure server-side resolver. Never import from Client Components.
- * `isTruthful`, Mark detail, riddles, and decoy selection all depend on teamSeed.
+ * `isTruthful`, Mark detail, riddles, and decoy selection all depend on teamSeed
+ * (unless truthPolicy fixes Act III specials).
  */
 export function resolveNodeContent(
   sequenceIndex: number,
@@ -58,7 +59,10 @@ export function resolveNodeContent(
   const decoyList = pool.length > 0 ? pool : decoysInPool;
   const decoy = rng.pick(decoyList);
 
-  const isTruthful = rng.bool();
+  const policy = template.truthPolicy ?? "seeded";
+  const isTruthful =
+    policy === "fixed-true" ? true : policy === "fixed-false" ? false : rng.bool();
+
   const variant = isTruthful ? rng.pick(template.truthfulVariants) : rng.pick(template.lyingVariants);
   const brokenMark = isTruthful ? "NONE" : variant.mark;
 
@@ -71,9 +75,6 @@ export function resolveNodeContent(
   const decoyHint = rng.pick(decoyHintOptions);
   const mirrorStyle = rng.pick(template.mirrorStyles);
 
-  // Correct path must be the riddle shown for the correct choice; wrong path → decoy.
-  // Truthful: TRUTH shows plain (next), LIE shows mirrored (decoy).
-  // Lying: TRUTH shows plain (decoy), LIE shows mirrored (next).
   let riddlePlain: string;
   let riddleMirrored: string;
   if (isTruthful) {
@@ -95,5 +96,7 @@ export function resolveNodeContent(
     clearReason: template.clearReason,
     decoyNodeId: decoy.id,
     decoyLocationName: decoy.locationName,
+    dependsOnFactKeys: template.dependsOnFactKeys,
+    emitsFact: template.emitsFact,
   };
 }

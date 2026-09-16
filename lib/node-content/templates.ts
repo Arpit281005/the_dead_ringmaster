@@ -3,11 +3,14 @@ import type { StoryNodeTemplate } from "./types";
 /**
  * Narrative templates for per-team resolution.
  * Location/suspect identity still lives on DB Node rows; solvable content is computed here.
+ * Act I (0–2): difficulty unchanged — only silent emitsFact on Quill for later deps.
  */
 export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 0,
     decoyPool: "act1",
+    dependsOnFactKeys: [],
+    emitsFact: null,
     testimonyFrame: `They will tell you I read palms for coin and call it prophecy. Perhaps. But I read Orlan's hand three summers running, and I will swear to what I know. {{MARK_CLAUSE}} I heard no quarrel, saw no shadow cross the chained west gate — how could I, chained as it was since dusk? Orlan mocked my cards last week, called them a parlour trick, and I forgave him for it, the way you forgive a child. I did not love him. I did not kill him either. Ask the wax. Ask the rain. Ask the silence after the bell.`,
     truthfulVariants: [
       {
@@ -68,6 +71,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 1,
     decoyPool: "act1",
+    dependsOnFactKeys: [],
+    emitsFact: null,
     testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The bell rang its hours, the rain fell, the gate stayed chained — I know because I checked it myself, twice, out of nothing but boredom. When the generator failed I lit a candle and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the big top. Ask anyone. Ask no one. It hardly matters which.`,
     truthfulVariants: [
       {
@@ -123,6 +128,11 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 2,
     decoyPool: "act1",
+    dependsOnFactKeys: [],
+    emitsFact: {
+      key: "quill_gate_chained",
+      text: "The west gate stayed chained from dusk; Quill never opened it.",
+    },
     testimonyFrame: `I counted them in — three by three, family by family, laugh by laugh — one hundred and eighty-one souls through my gate before the rain began. I have never lost count in eleven years and I did not lose it that night. {{MARK_CLAUSE}} Orlan trusted me with the coin box and I have never once shorted him a shilling. I saw the Painted Man cross the yard, I saw the twins arguing by their rig, I saw nothing of murder in any of it. The rain did not frighten me. The dark did not frighten me. Only the silence after, when the bell would not ring and no one would tell me why, frightened me enough to sit down on my own ticket stool and wait for someone braver than I am to go and look.`,
     truthfulVariants: [
       {
@@ -175,37 +185,39 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     clearReason:
       "Cleared — the gate stayed chained no matter what he claimed; his count still holds true.",
   },
+  // —— Act II ——
   {
     sequenceIndex: 3,
     decoyPool: "act2",
-    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. {{MARK_CLAUSE}} We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
+    dependsOnFactKeys: [],
+    emitsFact: {
+      key: "bahri_pit_bandage",
+      text: "Bahri's hands were bandaged from burns; he worked the fire pit from the rain through the generator's death.",
+    },
+    // Frame holds shared prose; Mark IV anchors live entirely in the clause.
+    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "I was practising when the rain started: swallow, breathe, swallow again — three long pulls of flame that lit the yard blue. The bell tolled its last true hour and I kept working by lamplight after the generator died. I liked Orlan well enough, though he never paid what he owed.",
+          "I was practising when the rain began: swallow, breathe, swallow again — three long pulls of flame that lit the yard blue. The bell tolled its last true hour and I kept working. After the generator died I worked by lamplight, same as always, same as every night this fortnight.",
       },
       {
         mark: "NONE",
         clause:
-          "Three pulls of flame, three breaths, three wraps of bandage. Orlan owed me coin; I owed him nothing but the show. I stayed at the pit through rain and lamplight.",
+          "Three anchors only: when the rain began I was already at the pit; the bell's last honest hour found me still swallowing flame; when the generator failed I switched to lamplight and did not leave.",
       },
     ],
     lyingVariants: [
       {
-        mark: "NAME",
+        mark: "RECKONING",
         clause:
-          "I was practising when the rain started: swallow, breathe, swallow again, three long pulls of flame. I liked the Ringmaster well enough, though he never paid what he owed.",
+          "I was practising from half past ten: swallow, breathe, swallow again — three long pulls of flame. When the rain began I did not stop. The bell tolled its last true hour and I kept working. After the generator died I worked by lamplight, same as always.",
       },
       {
-        mark: "THREE",
+        mark: "RECKONING",
         clause:
-          "I was practising when the rain started: swallow, breathe, spit, swallow again — four motions before the flame. Orlan laughed; I stayed at the pit.",
-      },
-      {
-        mark: "CASEFILE",
-        clause:
-          "I was practising when the rain started — three long pulls. After eleven I walked the west gate and found the chain slack, then returned to the pit by lamplight.",
+          "I worked the pit when the rain began and again after the generator died — two clock-bites and no more, because a burned man counts what hurts and forgets the bell.",
       },
     ],
     nextHints: [
@@ -228,39 +240,39 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     },
     mirrorStyles: ["antonym", "directional"],
     clearReason:
-      "Cleared — his hands could not have done it, whatever name he let slip and used.",
+      "Cleared — his hands could not have done it; the fire pit held him through the generator's death.",
   },
   {
     sequenceIndex: 4,
     decoyPool: "act2",
-    testimonyFrame: `Strength is a slow thing, people forget that. I do not move quick, I move certain — one lift, one plant, one hold, and the crowd forgets to breathe. {{MARK_CLAUSE}} Orlan came by once, asked if I'd lift the new frame myself and save him a labourer's wage. I said I would, for a fair cut. He laughed and walked off toward the big top, and that's the last true thing I know of him — walking, laughing, alive. The bell had already gone quiet by then. I stayed with my ropes till the shouting started.`,
+    dependsOnFactKeys: ["bahri_pit_bandage"],
+    emitsFact: {
+      key: "duran_shed_shape",
+      text: "A bandaged figure was seen at the generator shed after the bell died; Bahri was not that figure.",
+    },
+    testimonyFrame: `Strength is a slow thing, people forget that. I do not move quick, I move certain — one lift, one plant, one hold, and the crowd forgets to breathe. {{MARK_CLAUSE}} Orlan came by once, asked if I'd lift the new frame myself and save him a labourer's wage. I said I would, for a fair cut. He laughed and walked off toward the big top, and that's the last true thing I know of him — walking, laughing, alive. I stayed with my ropes till the shouting started.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores I do every night before a show. The rain came and I kept working under the awning. I did see a shape near the generator shed, close to half eleven, hands wrapped white in the lamplight — didn't think much of it, half the troupe nurses some wound or other.",
+          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores I do every night before a show. The rain came and I kept working under the awning. Close to half eleven, after the bell had already gone quiet, I did see a shape near the generator shed, hands wrapped white in the lamplight — didn't think much of it, half the troupe nurses some wound or other, and it was not the fire-eater's walk.",
       },
       {
         mark: "NONE",
         clause:
-          "Three chores under the awning: oil, coil, test. Rain on the canvas. A bandaged shape by the generator near half eleven — common enough. Orlan walked laughing toward the big top after the bell had gone quiet.",
+          "Three chores under the awning: oil, coil, test. Rain on the canvas. After the bell died I glimpsed a bandaged shape by the generator — not Bahri's gait, not the pit's man — then returned to the ropes.",
       },
     ],
     lyingVariants: [
       {
-        mark: "THREE",
-        clause:
-          "That night I oiled the rigging, coiled the rope, tested the frame, and counted the weights — four chores, not my usual three. The rain came. I saw a shape near the generator shed.",
-      },
-      {
         mark: "CASEFILE",
         clause:
-          "Three chores under the awning. The rain came. I saw the west gate swing open near half eleven — a bandaged figure slipping through — then returned to my ropes.",
+          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores. The rain came. Close to half eleven, after the bell had already gone quiet, I saw Bahri by the generator shed, hands wrapped white, clear as lamplight — the fire-eater, away from his pit.",
       },
       {
-        mark: "NAME",
+        mark: "THREE",
         clause:
-          "That night I kept to three chores. The Ringmaster came by once, asked about the frame, laughed, and walked toward the big top.",
+          "I oiled, coiled, tested, and counted the weights — four chores. After the bell died I swore I saw Bahri bandaged at the generator shed, clear as lamplight.",
       },
     ],
     nextHints: [
@@ -287,34 +299,31 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 5,
     decoyPool: "act2",
-    testimonyFrame: `We are two who answer as one, always have been, since our mother taught us that a trapeze forgives no soloists. {{MARK_CLAUSE}} Orlan liked to watch us rehearse, said we were the only honest act in his carnival, which we always took as a joke he half meant. We heard the bell stop, heard the rain start, heard the generator die somewhere in the dark behind us — we did not hear anything from the big top, not a cry, not a fall, not a single thing worth reporting. We were together the whole night. We are always together. That is the one truth in all of this.`,
+    dependsOnFactKeys: ["quill_gate_chained"],
+    emitsFact: null,
+    testimonyFrame: `We are two who answer as one, always have been, since our mother taught us that a trapeze forgives no soloists. {{MARK_CLAUSE}} Orlan liked to watch us rehearse, said we were the only honest act in his carnival, which we always took as a joke he half meant. We were together the whole night. We are always together. That is the one truth in all of this.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry. We told each other everything in threes: chalk, grip, confidence.",
+          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry from the afternoon. We heard the bell stop, heard the rain start, heard the generator die somewhere in the dark behind us — we did not leave the poles, did not walk the west gate, did not hear anything from the big top worth reporting.",
       },
       {
         mark: "NONE",
         clause:
-          "Chalk, grip, confidence — our triad. We rehearsed under silk while the rain began and the generator failed. Orlan watched once, early, then left us to the poles.",
+          "Chalk, grip, confidence — our triad. We stayed under silk through rain and generator-death. We never touched the west gate's chain.",
       },
     ],
     lyingVariants: [
       {
         mark: "THREE",
         clause:
-          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because the net was still wet from an afternoon spent nowhere near it, and neither of us wanted to say so first.",
-      },
-      {
-        mark: "NAME",
-        clause:
-          "That night we chalked, checked the rig, checked the net. The Ringmaster liked to watch us rehearse. We stayed together through rain and dark.",
+          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because after the generator died we left the poles and walked the west gate, and found the chain hanging slack for a breath before we fled back. We heard the bell stop, heard the rain start, heard the generator die — and we heard the gate complain on its hinge, though Quill swears it never moved.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "Three duties at the poles. After the generator died we walked the west gate and found it unchained for a moment — then fled back to the net.",
+          "Three duties at the poles, then a walk: after the generator died we found the west gate unchained for a breath and fled back to the net.",
       },
     ],
     nextHints: [
@@ -337,39 +346,30 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     },
     mirrorStyles: ["negation", "reversed"],
     clearReason:
-      "Cleared — together, as always, however the rhythm of their telling broke.",
+      "Cleared — together at the poles; the gate's chain was never theirs to find slack.",
   },
+  // —— Act III ——
   {
     sequenceIndex: 6,
     decoyPool: "act3",
-    testimonyFrame: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. {{MARK_CLAUSE}} I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
+    dependsOnFactKeys: [],
+    truthPolicy: "fixed-true",
+    emitsFact: {
+      key: "ostrin_stage_lamp",
+      text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the big top before the rain.",
+    },
+    // Red herring: appears to break Mark I / III on a careless read; always truthful.
+    testimonyFrame: `{{MARK_CLAUSE}}`,
     truthfulVariants: [
       {
         mark: "NONE",
-        clause:
-          "I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too. Orlan visited once, early, before the rain — checked my work, called it \"too honest a face for a liar's trade,\" and left laughing toward the big top.",
-      },
-      {
-        mark: "NONE",
-        clause:
-          "Three tasks behind the curtain: string, test, rehearse. Orlan came early, praised the face as too honest for a liar's trade, and walked laughing to the big top before the rain. I stayed with the wood through bell and lamplight.",
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
       },
     ],
     lyingVariants: [
       {
-        mark: "THREE",
-        clause:
-          "I was behind the stage: stringing Orlan's likeness, testing joints, rehearsing his line, and oiling the crossbar — four labours. He visited early, called the face too honest for a liar's trade, and left laughing toward the big top.",
-      },
-      {
-        mark: "NAME",
-        clause:
-          "I was behind the stage all evening with the Ringmaster's likeness on the stand. He visited once before the rain, laughed, and left for the big top. I did not follow.",
-      },
-      {
-        mark: "CASEFILE",
-        clause:
-          "Three tasks behind the curtain. After the generator failed I walked the west gate and opened it for a breath of wet air, then returned to the strings.",
+        mark: "NONE",
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
       },
     ],
     nextHints: [
@@ -396,34 +396,26 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 7,
     decoyPool: "act3",
+    dependsOnFactKeys: ["duran_shed_shape", "ostrin_stage_lamp"],
+    emitsFact: null,
     testimonyFrame: `I keep the gate when Quill sleeps, and that night neither of us slept at all. {{MARK_CLAUSE}} The chained gate never opened, I'd stake my post on it. Orlan crossed my line of sight only once that night, laughing, heading for the big top, and I never saw him walk back out. Make of that what you will. I only watch. I don't judge. But I know where the last lamp was burning, and I know who was standing under it.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "I saw three things worth telling: the rain start, the generator die, and the puppet-stage lamp still burning long after every other light in the yard had gone dark. The strongman told you the bell had already gone quiet when he saw a bandaged shape by the generator shed — I saw that same shape too, only I saw it walk the other way after, back toward the stage with the strings, not toward the fire pit at all.",
-      },
-      {
-        mark: "NONE",
-        clause:
-          "Three sights from the post: rain beginning, generator dying, puppet lamp still lit. The bandaged shape left the shed toward the strings, not the fire. Orlan laughed past once and did not return.",
+          "I saw three things worth telling: the rain start, the generator die, and the puppet-stage lamp still burning long after every other light in the yard had gone dark. The strongman told his own story of a bandaged shape by the generator shed — I saw that same shape too, only after the generator failed I saw it walk the other way, back toward the stage with the strings, not toward the fire pit at all.",
       },
     ],
     lyingVariants: [
       {
-        mark: "THREE",
+        mark: "RECKONING",
         clause:
-          "I saw four things worth telling: the rain start, the generator die, the puppet lamp burning, and the carousel still turning after eleven. The bandaged shape walked toward the strings.",
+          "I saw the rain start and the puppet-stage lamp still burning — two sights only — and I swear the west gate opened a hand's width after midnight though the chain should have held.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "Three sights from the post. Near the end I undid the west-gate chain myself to check the road, then locked it again — rain in my collar, nothing on the path.",
-      },
-      {
-        mark: "NAME",
-        clause:
-          "I saw the rain, the generator die, the puppet lamp. The Ringmaster crossed my sight once, laughing toward the big top, and never walked back out.",
+          "I saw three things: the rain start, the generator die, and the puppet lamp. Afterward I undid the west-gate chain myself to check the road, then locked it again.",
       },
     ],
     nextHints: [
