@@ -1,7 +1,6 @@
 # The Carnival of Lies
 
-A mobile-first web app for a live, campus-wide detective hunt. Built from
-[carnival-of-lies-build-prompt.md](./carnival-of-lies-build-prompt.md).
+A mobile-first web app for a live, campus-wide detective hunt.
 
 This build covers the **core player loop**: team registration, the Midway map,
 QR/manual scanning, testimony + verdict + mirror-riddle resolution, the
@@ -34,6 +33,45 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## Production (SQLite single-node)
+
+This app is meant for **one long-lived Node process** with a **persistent SQLite
+file**. It is not a fit for Vercel/serverless (native `better-sqlite3`, durable
+disk, and in-memory rate limits).
+
+**Required env (production):**
+
+| Variable | Notes |
+|----------|--------|
+| `DATABASE_URL` | Absolute path on a volume, e.g. `file:/data/carnival.db` |
+| `QR_HMAC_SECRET` | ≥16 characters |
+| `ADMIN_PASSWORD` | ≥8 characters |
+| `ADMIN_SESSION_SECRET` | Recommended session pepper |
+| `NODE_ENV` | `production` |
+
+**Docker (scale = 1):**
+
+```bash
+docker build -t carnival-of-lies .
+docker run -d --name carnival -p 3000:3000 \
+  -v carnival-data:/data \
+  -e DATABASE_URL="file:/data/carnival.db" \
+  -e QR_HMAC_SECRET="your-long-random-secret" \
+  -e ADMIN_PASSWORD="your-strong-admin-password" \
+  -e ADMIN_SESSION_SECRET="your-session-pepper" \
+  carnival-of-lies
+```
+
+Migrations run on container start (`prisma migrate deploy`). **Seed once** after
+first boot from a local checkout that can see the same DB file (seed **wipes**
+existing teams — do not re-run on every deploy):
+
+```bash
+DATABASE_URL="file:/path/to/carnival.db" npm run db:seed
+```
+
+Back up the `/data` volume before upgrades. Keep **one replica** only.
 
 ## Testing the hunt without printed QR codes
 

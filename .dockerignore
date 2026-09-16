@@ -1,0 +1,30 @@
+# dependencies & build
+node_modules
+.next
+out
+build
+coverage
+
+# git / IDE / agent packs
+.git
+.agents
+.claude
+.windsurf
+skills-lock.json
+*.md
+!README.md
+
+# env & local db
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+dev.db
+prisma/dev.db
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+.vercel

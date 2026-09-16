@@ -1,0 +1,1 @@
+# Empty on purpose — static assets live elsewhere; keep dir for Next.js / Docker COPY.
