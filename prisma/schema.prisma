@@ -1,5 +1,6 @@
 // The Carnival of Lies — data model
 // Local SQLite for dev; swap datasource for Postgres/Supabase at deploy time.
+// True Postgres RLS is deferred to that cutover; until then enforce teamId in app code.
 
 generator client {
   provider = "prisma-client"
@@ -27,6 +28,8 @@ model Suspect {
 model Node {
   id                  String  @id @default(cuid())
   sequenceIndex       Int     @unique // 0..7 story nodes; negative for decoys
+  /** Stable print slot: S0–S7 story, D{id} decoys. QR signs nodeSlot.token — not a one-shot token. */
+  nodeSlot            String  @unique
   suspectId           String?
   suspect             Suspect? @relation(fields: [suspectId], references: [id])
 
@@ -34,7 +37,9 @@ model Node {
   locationDescription String
   act                 Int // 1, 2, or 3 (0 for decoys)
 
-  token                String  @unique // opaque nonce bound into HMAC QR payload (nodeId.nonce.mac)
+  token                String  @unique // opaque print nonce bound into HMAC QR (nodeSlot.token.mac)
+  /** Soft floor for admin FAST_RESOLVE flags; never auto-penalizes. */
+  minExpectedSeconds   Int     @default(0)
 
   isDecoy              Boolean @default(false)
   decoyPool            String? // act1 | act2 | act3 — pool membership when isDecoy
@@ -43,6 +48,7 @@ model Node {
   scans                Scan[]
   verdicts              Verdict[]
   clearances            Clearance[]
+  securityFlags         SecurityFlag[]
 }
 
 model Team {
@@ -51,7 +57,7 @@ model Team {
   name           String
   members        String // JSON-encoded string[]
   contact        String
-  teamSeed       String // SHA-256(teamCode) prefix — stable per team for content variation
+  teamSeed       String // SHA-256(teamCode) prefix — server-only; never ship in page DTOs
 
   currentIndex   Int       @default(0) // sequenceIndex of the node currently in play
   penaltySeconds Int       @default(0)
@@ -66,6 +72,34 @@ model Team {
   notes          TeamNote[]
   facts          TeamFact[]
   accusation     Accusation?
+  devices        TeamDevice[]
+  securityFlags  SecurityFlag[]
+}
+
+model TeamDevice {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id])
+  deviceId   String
+  firstIp    String?
+  lastIp     String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@unique([teamId, deviceId])
+}
+
+model SecurityFlag {
+  id              String    @id @default(cuid())
+  teamId          String
+  team            Team      @relation(fields: [teamId], references: [id])
+  kind            String // UNKNOWN_DEVICE | UNKNOWN_IP | FAST_RESOLVE
+  detail          String
+  nodeId          String?
+  node            Node?     @relation(fields: [nodeId], references: [id])
+  createdAt       DateTime  @default(now())
+  acknowledgedAt  DateTime?
 }
 
 model Scan {

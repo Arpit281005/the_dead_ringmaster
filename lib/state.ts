@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
+import { toTeamPublic, type TeamPublic } from "@/lib/team-access";
 export { formatDuration } from "@/lib/format";
+export type { TeamPublic };
 
 export const TOTAL_STORY_NODES = 8;
 
@@ -11,6 +13,13 @@ export type TeamPhase =
   | "decoy-pending"
   | "accusation"
   | "finished";
+
+/**
+ * Content shipping checklist (never pre-scan):
+ * - No testimony / isTruthful / brokenMark / riddles / cipherKey / accusationFactKeyword
+ * - No teamSeed / contact / members in page DTOs (use TeamPublic)
+ * - Midway locked tents: fog UI only (names not rendered)
+ */
 
 /** Midway / phase fields only — never includes testimony, riddles, isTruthful, or token. */
 const storyNodePublicSelect = {
@@ -25,6 +34,7 @@ const storyNodePublicSelect = {
 
 export type StoryNodePublic = Awaited<ReturnType<typeof getAllStoryNodes>>[number];
 
+/** Server-only full team (includes teamSeed). Prefer toTeamPublic for pages. */
 export async function getTeamByCode(teamCode: string) {
   return prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
 }
@@ -139,22 +149,29 @@ export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
   };
 }
 
+/** Minimal last-verdict surface for UI flags — not full row. */
+export type LastVerdictSummary = {
+  wasCorrect: boolean;
+  riddleUnlocked: boolean;
+};
+
 export async function getTeamState(teamCode: string) {
-  const team = await getTeamByCode(teamCode);
-  if (!team) {
+  const raw = await getTeamByCode(teamCode);
+  if (!raw) {
     return { phase: "not-found" as TeamPhase, team: null } as const;
   }
+  const team = toTeamPublic(raw);
 
   const nodes = await getAllStoryNodes();
   const clearances = await prisma.clearance.findMany({
-    where: { teamId: team.id },
+    where: { teamId: raw.id },
   });
   const accusation = await prisma.accusation.findUnique({
-    where: { teamId: team.id },
+    where: { teamId: raw.id },
     include: { suspect: { select: { id: true, name: true } } },
   });
 
-  if (team.status === "FINISHED" || accusation) {
+  if (raw.status === "FINISHED" || accusation) {
     return {
       phase: "finished" as TeamPhase,
       team,
@@ -165,7 +182,7 @@ export async function getTeamState(teamCode: string) {
     } as const;
   }
 
-  if (team.currentIndex >= TOTAL_STORY_NODES) {
+  if (raw.currentIndex >= TOTAL_STORY_NODES) {
     return {
       phase: "accusation" as TeamPhase,
       team,
@@ -176,13 +193,20 @@ export async function getTeamState(teamCode: string) {
     } as const;
   }
 
-  const currentNode = nodes.find((n) => n.sequenceIndex === team.currentIndex) ?? null;
+  const currentNode = nodes.find((n) => n.sequenceIndex === raw.currentIndex) ?? null;
   if (!currentNode) {
-    return { phase: "not-found" as TeamPhase, team, nodes, clearances, accusation: null, currentNode: null } as const;
+    return {
+      phase: "not-found" as TeamPhase,
+      team,
+      nodes,
+      clearances,
+      accusation: null,
+      currentNode: null,
+    } as const;
   }
 
   const scan = await prisma.scan.findFirst({
-    where: { teamId: team.id, nodeId: currentNode.id, wasValid: true },
+    where: { teamId: raw.id, nodeId: currentNode.id, wasValid: true },
   });
 
   if (!scan) {
@@ -196,13 +220,15 @@ export async function getTeamState(teamCode: string) {
     } as const;
   }
 
-  const lastVerdict = await prisma.verdict.findFirst({
-    where: { teamId: team.id, nodeId: currentNode.id },
+  const lastVerdictRow = await prisma.verdict.findFirst({
+    where: { teamId: raw.id, nodeId: currentNode.id },
     orderBy: { submittedAt: "desc" },
   });
+  const lastVerdict: LastVerdictSummary | null = lastVerdictRow
+    ? { wasCorrect: lastVerdictRow.wasCorrect, riddleUnlocked: lastVerdictRow.riddleUnlocked }
+    : null;
 
-  // Act II+: stay on testimony until the cipher key unlocks the reading.
-  if (lastVerdict && !lastVerdict.riddleUnlocked && currentNode.sequenceIndex >= 3) {
+  if (lastVerdictRow && !lastVerdictRow.riddleUnlocked && currentNode.sequenceIndex >= 3) {
     return {
       phase: "testimony" as TeamPhase,
       team,
@@ -215,12 +241,12 @@ export async function getTeamState(teamCode: string) {
     } as const;
   }
 
-  if (lastVerdict && !lastVerdict.wasCorrect) {
+  if (lastVerdictRow && !lastVerdictRow.wasCorrect) {
     const decoyScan = await prisma.scan.findFirst({
       where: {
-        teamId: team.id,
+        teamId: raw.id,
         wasValid: true,
-        scannedAt: { gt: lastVerdict.submittedAt },
+        scannedAt: { gt: lastVerdictRow.submittedAt },
         node: { isDecoy: true },
       },
     });

@@ -73,17 +73,36 @@ intentional, not a bug.
   Volunteer/admin cheat sheet: `/dev/riddle-keys` (dev only).
 - **Wrong verdicts don't lock a team out.** They cost a scan at the seeded
   decoy tent (+5 min penalty) and a themed "misled" passage, after which the
-  team can submit a fresh verdict for the same testimony.
+  team can submit a fresh verdict for the same testimony. After **two** wrong
+  verdicts at one node, further wrongs add an escalated **+10 min** fine
+  (Carnival Tokens not built yet — mandatory token spend can replace this later).
 - **Accusation**: name an uncleared suspect, a method/weapon, and a Case File
   keystone fact (seeded per team from Ostrin's truthful variant). Method and
   fact are graded by keyword token — wrong answers lower score for ranking but
   never block finish or the reveal. One sentence of reasoning is kept for human
   tie-breakers. The clock locks on submit; the reveal shows which of the three
   structured parts matched (this team's submission only).
-- **Sequence enforcement** is server-side only: every scan and verdict is
-  validated against `team.currentIndex` via Server Actions. QR payloads are
-  HMAC-signed (`nodeId.nonce.mac`); scans are rate-limited (~10/min/team);
-  decoy penalties are idempotent per wrong-verdict cycle.
+- **Sequence / scan hardening**: QR payloads are HMAC-signed as
+  `nodeSlot.token.mac` (stable print slot). Authorization is always
+  `(team, nodeSlot)` — stickers are multi-team reusable, never globally spent.
+  Scans: 6/min/team + 8s min interval per node; verdicts: 8/min/team. Story and
+  decoy re-scans are idempotent (no double advance / double penalty). Soft
+  `SecurityFlag`s for unknown device/IP and fast resolves (`Node.minExpectedSeconds`);
+  review at `/dev/security-flags` (dev only). Page DTOs use `TeamPublic` (no
+  `teamSeed`). **Postgres RLS is not on SQLite** — isolation is app-layer
+  `teamCode` → `teamId` filters via `lib/team-access.ts`.
+
+### Hardening change log (vs requirements)
+
+| Change | Closes |
+|--------|--------|
+| `nodeSlot` + QR sign by slot; scan eval `(team, slot)` | Req 1 — shared sticker ≠ spent token |
+| `TeamDevice` + soft `SecurityFlag` on unknown device/IP | Req 2 — photo-share signal |
+| Scan 6/min + 8s/node; verdict RL; +10m after 2 wrongs | Req 3 — brute force |
+| Public team DTO; `lib/solution.ts` split; prop audit | Req 4 — content intercept |
+| Explicit idempotent paths + `scripts/scan-idempotency-check.ts` | Req 5 — double scan |
+| `minExpectedSeconds` + `FAST_RESOLVE` flags | Req 6 — speed review |
+| `team-access` helpers + no-RLS-on-SQLite docs | Req 7 — isolation |
 
 ### Difficulty ramp (as implemented)
 
@@ -125,12 +144,12 @@ new Prisma models and App Router surfaces:
 
 - Admin dashboard (`admin_actions`, organiser auth, live team table, unstick,
   pause/resume, broadcast, CSV, print sheet, start-queue)
-- **Hints / Carnival Tokens** (`hints`) — design: 2 tokens per team; spend at
-  a node for approach-only help; cost **+3 minutes**. Not built. Token copy
-  may name a Mark **class** or “revisit the Case Note from tent X”; it must
-  **never** reveal TRUTH/LIE, plaintext/decoded riddle, cipher word, or next
-  location name. (Post-verdict location riddles in templates are progression,
-  not token content.)
+- Hints / Carnival Tokens (`hints`) — design: 2 tokens per team; spend at
+  a node for approach-only help; cost **+3 minutes**. Not built. When shipped,
+  prefer mandatory token spend after 2 wrongs at a node over the current +10m
+  escalated penalty. Token copy may name a Mark **class** or “revisit the Case
+  Note from tent X”; it must **never** reveal TRUTH/LIE, plaintext/decoded
+  riddle, cipher word, or next location name.
 - **Madame Vireya optional side-tent** — design: off-path visit costs
   **5 minutes** for one free suspect elimination. Not built. Distinct from
   story node 0 (The Divination Tent), which is the mandatory Act I fortune

@@ -2,9 +2,9 @@
 
 import { prisma } from "@/lib/db";
 import { TOTAL_STORY_NODES } from "@/lib/state";
-import { SOLUTION_TEXT } from "@/lib/content";
+import { SOLUTION_TEXT } from "@/lib/solution";
 import { verifySignedQrPayload } from "@/lib/qr-token";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkRateLimit, checkMinInterval } from "@/lib/rate-limit";
 import { deriveTeamSeed } from "@/lib/team-seed";
 import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
 import {
@@ -13,10 +13,16 @@ import {
   normalizeAccusationToken,
 } from "@/lib/node-content/accusation";
 import { normalizeCipherKey } from "@/lib/node-content/riddle-cipher";
+import { ensureClientContext, touchTeamDevice, flagFastResolve } from "@/lib/device-binding";
+import { requireTeamByCode } from "@/lib/team-access";
 import { customAlphabet } from "nanoid";
 
 const DECOY_PENALTY_SECONDS = 5 * 60;
-const SCAN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
+/** Extra time after 2 wrong verdicts at one node (tokens still greenfield). */
+const ESCALATED_VERDICT_PENALTY_SECONDS = 10 * 60;
+const SCAN_RATE_LIMIT = { limit: 6, windowMs: 60_000 };
+const SCAN_NODE_MIN_INTERVAL_MS = 8_000;
+const VERDICT_RATE_LIMIT = { limit: 8, windowMs: 60_000 };
 const codeDigits = customAlphabet("0123456789", 4);
 const NAME_WORDS = /[A-Za-z]+/g;
 
@@ -39,6 +45,16 @@ async function loadDecoyRefs(): Promise<DecoyRef[]> {
 async function resolveForTeam(teamSeed: string, sequenceIndex: number) {
   const decoys = await loadDecoyRefs();
   return resolveNodeContent(sequenceIndex, teamSeed, decoys);
+}
+
+async function maybeFlagFastResolve(teamId: string, nodeId: string, minExpectedSeconds: number) {
+  const firstScan = await prisma.scan.findFirst({
+    where: { teamId, nodeId, wasValid: true },
+    orderBy: { scannedAt: "asc" },
+  });
+  if (!firstScan) return;
+  const elapsed = Math.floor((Date.now() - firstScan.scannedAt.getTime()) / 1000);
+  await flagFastResolve(teamId, nodeId, elapsed, minExpectedSeconds);
 }
 
 export type ActionResult<T> =
@@ -65,7 +81,7 @@ export async function createTeam(input: {
     teamCode = generateTeamCode(name);
   }
 
-  await prisma.team.create({
+  const team = await prisma.team.create({
     data: {
       teamCode,
       name,
@@ -76,13 +92,19 @@ export async function createTeam(input: {
     },
   });
 
+  const ctx = await ensureClientContext();
+  await touchTeamDevice(team.id, ctx);
+
   return { ok: true, data: { teamCode } };
 }
 
 export async function joinTeam(teamCodeInput: string): Promise<ActionResult<{ teamCode: string }>> {
-  const teamCode = teamCodeInput.trim().toUpperCase();
-  const team = await prisma.team.findUnique({ where: { teamCode } });
+  const team = await requireTeamByCode(teamCodeInput.trim());
   if (!team) return { ok: false, error: "No team carries that code. Check with your Notebook holder." };
+
+  const ctx = await ensureClientContext();
+  await touchTeamDevice(team.id, ctx);
+
   return { ok: true, data: { teamCode: team.teamCode } };
 }
 
@@ -91,10 +113,18 @@ type ScanResult =
   | { valid: true; kind: "decoy"; passage: string; locationName: string }
   | { valid: false; reason: string };
 
+/**
+ * Evaluate a printed QR against (team, nodeSlot).
+ * Stickers are multi-team reusable — never a globally spent token.
+ * Story re-scan: same state, no double row. Decoy re-scan: same passage, no double penalty.
+ */
 export async function scanNode(teamCode: string, rawToken: string): Promise<ActionResult<ScanResult>> {
-  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
   if (team.status === "FINISHED") return { ok: false, error: "This team has already finished the hunt." };
+
+  const ctx = await ensureClientContext();
+  await touchTeamDevice(team.id, ctx);
 
   const rate = checkRateLimit(`scan:${team.id}`, SCAN_RATE_LIMIT);
   if (!rate.allowed) {
@@ -116,10 +146,24 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
   }
 
   const node = await prisma.node.findFirst({
-    where: { id: verified.nodeId, token: verified.nonce },
+    where: { nodeSlot: verified.nodeSlot, token: verified.token },
   });
   if (!node) {
     return { ok: true, data: { valid: false, reason: "That code doesn't match any tent in the fairground." } };
+  }
+
+  const nodeCooldown = checkMinInterval(
+    `scan-node:${team.id}:${node.id}`,
+    SCAN_NODE_MIN_INTERVAL_MS
+  );
+  if (!nodeCooldown.allowed) {
+    return {
+      ok: true,
+      data: {
+        valid: false,
+        reason: "Give that tent a moment — try again in a few seconds.",
+      },
+    };
   }
 
   if (node.isDecoy) {
@@ -144,7 +188,6 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
       };
     }
 
-    // Idempotent: same decoy after this wrong verdict must not double-penalise.
     const existingDecoy = await prisma.scan.findFirst({
       where: {
         teamId: team.id,
@@ -211,6 +254,7 @@ type VerdictResult = {
   huntComplete: boolean;
   needsKey: boolean;
   keyPrompt: string | null;
+  escalatedPenalty: boolean;
 };
 
 export async function submitVerdict(
@@ -218,8 +262,16 @@ export async function submitVerdict(
   nodeId: string,
   choice: "TRUTH" | "LIE"
 ): Promise<ActionResult<VerdictResult>> {
-  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
+
+  const ctx = await ensureClientContext();
+  await touchTeamDevice(team.id, ctx);
+
+  const rate = checkRateLimit(`verdict:${team.id}`, VERDICT_RATE_LIMIT);
+  if (!rate.allowed) {
+    return { ok: false, error: "Too many verdict attempts — wait a moment." };
+  }
 
   const node = await prisma.node.findUnique({ where: { id: nodeId }, include: { suspect: true } });
   if (!node) return { ok: false, error: "Testimony not found." };
@@ -228,7 +280,9 @@ export async function submitVerdict(
     return { ok: false, error: "This testimony is no longer active for your team." };
   }
 
-  const scan = await prisma.scan.findFirst({ where: { teamId: team.id, nodeId: node.id, wasValid: true } });
+  const scan = await prisma.scan.findFirst({
+    where: { teamId: team.id, nodeId: node.id, wasValid: true },
+  });
   if (!scan) return { ok: false, error: "Scan the tent's code before rendering a verdict." };
 
   const lastVerdict = await prisma.verdict.findFirst({
@@ -254,6 +308,10 @@ export async function submitVerdict(
       return { ok: false, error: "Find the dead-end marker before you try this verdict again." };
     }
   }
+
+  const priorWrongs = await prisma.verdict.count({
+    where: { teamId: team.id, nodeId: node.id, wasCorrect: false },
+  });
 
   const resolved = await resolveForTeam(team.teamSeed, node.sequenceIndex);
 
@@ -283,6 +341,7 @@ export async function submitVerdict(
   let clearedSuspectName: string | null = null;
   let advanced = false;
   let huntComplete = false;
+  let escalatedPenalty = false;
 
   if (wasCorrect) {
     if (resolved.emitsFact) {
@@ -321,13 +380,20 @@ export async function submitVerdict(
       clearedSuspectName = node.suspect?.name ?? null;
     }
 
-    // Act II+: do not advance Midway until riddle is unlocked with the on-site key.
     if (!resolved.needsKey) {
       const nextIndex = node.sequenceIndex + 1;
       await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
       advanced = true;
       huntComplete = nextIndex >= TOTAL_STORY_NODES;
+      await maybeFlagFastResolve(team.id, node.id, node.minExpectedSeconds);
     }
+  } else if (priorWrongs >= 2) {
+    // 3rd+ wrong at this node: escalated time cost (token spend when Tokens ship).
+    await prisma.team.update({
+      where: { id: team.id },
+      data: { penaltySeconds: { increment: ESCALATED_VERDICT_PENALTY_SECONDS } },
+    });
+    escalatedPenalty = true;
   }
 
   return {
@@ -340,6 +406,7 @@ export async function submitVerdict(
       huntComplete,
       needsKey: resolved.needsKey,
       keyPrompt: resolved.keyPrompt,
+      escalatedPenalty,
     },
   };
 }
@@ -356,7 +423,7 @@ export async function unlockRiddle(
   nodeId: string,
   rawKey: string
 ): Promise<ActionResult<UnlockResult>> {
-  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
 
   const rate = checkRateLimit(`unlock:${team.id}`, { limit: 20, windowMs: 60_000 });
@@ -406,12 +473,12 @@ export async function unlockRiddle(
   let clearedSuspectName: string | null = null;
 
   if (lastVerdict.wasCorrect) {
-    // Advance only once, on successful unlock after a correct verdict.
     if (team.currentIndex === node.sequenceIndex) {
       const nextIndex = node.sequenceIndex + 1;
       await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
       advanced = true;
       huntComplete = nextIndex >= TOTAL_STORY_NODES;
+      await maybeFlagFastResolve(team.id, node.id, node.minExpectedSeconds);
     }
     if (resolved.clearReason && node.suspect) {
       clearedSuspectName = node.suspect.name;
@@ -429,7 +496,7 @@ export async function updateTeamNote(
   suspectId: string,
   note: string
 ): Promise<ActionResult<null>> {
-  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
 
   await prisma.teamNote.upsert({
@@ -457,7 +524,7 @@ export async function submitAccusation(
   factKeyword: string,
   reasoning: string
 ): Promise<ActionResult<AccusationResult>> {
-  const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
+  const team = await requireTeamByCode(teamCode);
   if (!team) return { ok: false, error: "Team not found." };
   if (team.currentIndex < TOTAL_STORY_NODES) {
     return { ok: false, error: "Every tent must be resolved before the Accusation." };

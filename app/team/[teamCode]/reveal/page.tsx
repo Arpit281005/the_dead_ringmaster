@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getTeamState, formatDuration } from "@/lib/state";
-import { SOLUTION_TEXT } from "@/lib/content";
+import { SOLUTION_TEXT } from "@/lib/solution";
 import { labelForFactKeyword } from "@/lib/node-content/accusation";
 import { prisma } from "@/lib/db";
 

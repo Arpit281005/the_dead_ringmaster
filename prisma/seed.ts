@@ -12,6 +12,8 @@ const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 
 async function main() {
   console.log("Clearing existing data...");
+  await prisma.securityFlag.deleteMany();
+  await prisma.teamDevice.deleteMany();
   await prisma.accusation.deleteMany();
   await prisma.teamFact.deleteMany();
   await prisma.teamNote.deleteMany();
@@ -155,8 +157,14 @@ async function main() {
 
   const createdNodes = [];
   for (const n of nodes) {
+    const minExpectedSeconds = n.act === 1 ? 90 : n.act === 2 ? 180 : 240;
     const created = await prisma.node.create({
-      data: { ...n, token: token() },
+      data: {
+        ...n,
+        token: token(),
+        nodeSlot: `S${n.sequenceIndex}`,
+        minExpectedSeconds,
+      },
     });
     createdNodes.push(created);
   }
@@ -222,7 +230,7 @@ async function main() {
   ];
 
   for (const [i, d] of decoys.entries()) {
-    await prisma.node.create({
+    const idPlaceholder = await prisma.node.create({
       data: {
         sequenceIndex: -(i + 1),
         locationName: d.locationName,
@@ -232,7 +240,13 @@ async function main() {
         decoyPool: d.decoyPool,
         decoyPassage: d.decoyPassage,
         token: token(),
+        nodeSlot: `Dtmp${i}`,
+        minExpectedSeconds: 0,
       },
+    });
+    await prisma.node.update({
+      where: { id: idPlaceholder.id },
+      data: { nodeSlot: `D${idPlaceholder.id}` },
     });
   }
 

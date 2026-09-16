@@ -14,6 +14,7 @@ export default async function DevQrPage() {
     orderBy: [{ isDecoy: "asc" }, { sequenceIndex: "asc" }],
     select: {
       id: true,
+      nodeSlot: true,
       token: true,
       isDecoy: true,
       sequenceIndex: true,
@@ -27,7 +28,7 @@ export default async function DevQrPage() {
 
   const withQr = await Promise.all(
     nodes.map(async (n) => {
-      const payload = createSignedQrPayload(n.id, n.token);
+      const payload = createSignedQrPayload(n.nodeSlot, n.token);
       return {
         node: n,
         payload,

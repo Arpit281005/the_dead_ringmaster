@@ -16,6 +16,7 @@ type Result = {
   huntComplete: boolean;
   needsKey: boolean;
   keyPrompt: string | null;
+  escalatedPenalty?: boolean;
 };
 
 export default function VerdictPanel({
@@ -148,10 +149,23 @@ export default function VerdictPanel({
           </p>
         )}
 
-        {unlocked && !result.advanced && !result.wasCorrect && (
+        {result.escalatedPenalty && (
+          <p className="text-sm text-oxblood leading-relaxed">
+            The fairground grows impatient — a heavier fine has been applied for repeated
+            misjudgments at this tent.
+          </p>
+        )}
+
+        {unlocked && !result.advanced && !result.wasCorrect && !result.escalatedPenalty && (
           <p className="text-sm text-oxblood leading-relaxed">
             Something doesn&apos;t sit right. Follow the riddle — if it leads to a dead end, scan
             what you find there, then return and weigh the testimony again.
+          </p>
+        )}
+
+        {unlocked && !result.advanced && !result.wasCorrect && result.escalatedPenalty && (
+          <p className="text-sm text-oxblood leading-relaxed">
+            Follow the riddle to the dead end, scan what you find, then weigh the testimony again.
           </p>
         )}
 
