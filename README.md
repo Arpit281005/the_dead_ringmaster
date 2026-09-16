@@ -64,10 +64,6 @@ intentional, not a bug.
   `isTruthful`, Mark-bearing detail, riddle text, and a decoy from that node's
   act pool. Content is returned only after a valid scan (testimony page) or
   inside verdict/decoy Server Actions — never on Midway props for locked tents.
-- **Act II/III difficulty**: teams unlock **Case Notes** (`TeamFact`) on the
-  Deduction Board when they judge a tent correctly. Later tents may require
-  those notes (server-gated). Mark IV (The Reckoning) is taught in the Case
-  File up front; which tent uses which Mark is not.
 - **Riddle mechanic**: the app shows the plain riddle if the team says TRUTH,
   the mirrored riddle if they say LIE. The *correct* choice always points to
   the next story tent; the incorrect choice points to that team's seeded decoy.
@@ -83,6 +79,39 @@ intentional, not a bug.
   HMAC-signed (`nodeId.nonce.mac`); scans are rate-limited (~10/min/team);
   decoy penalties are idempotent per wrong-verdict cycle.
 
+### Difficulty ramp (as implemented)
+
+**Act I** (tents 1–3 / `sequenceIndex` 0–2) — easy / teaching
+
+- Marks I–III only in lying variants; no Mark IV; no Case Note dependencies;
+  `keySource: null`.
+- Correct verdict returns the **final** location riddle immediately (single-step).
+- Quill silently emits Case Note `quill_gate_chained` + cipher stamp `CHAIN`
+  for later tents (no extra player puzzle at Quill).
+- Intent: teach Marks and TRUTH/LIE routing without cross-tent homework.
+
+**Act II** (tents 4–6 / 3–5) — subtle + cross-reference
+
+- Bahri: Mark IV (Reckoning) on lies; volunteer cipher word `CINDER`; emits
+  `bahri_pit_bandage` + `BANDAGE`.
+- Duran: requires Bahri Case Note; cipher key `BANDAGE`; emits
+  `duran_shed_shape` + `SHED`.
+- Twins: require Quill Case Note; cipher key `CHAIN`.
+- Stage1 cipher after verdict until Unlock; Midway advances only after a
+  correct unlock.
+- Intent: cross-reference + on-site key; Mark IV is taught in the Case File,
+  but which tent uses it is not spoiled.
+
+**Act III** (tents 7–8 / 6–7) — red herring + synthesis
+
+- Ostrin: `truthPolicy: "fixed-true"` (always truthful — red herring as the
+  murderer who never breaks a Mark); volunteer word `STRING`; emits
+  `ostrin_stage_lamp` + `LAMP`.
+- Watchman: requires `duran_shed_shape` + `ostrin_stage_lamp`; cipher key
+  `LAMP`; can break Mark IV on lies.
+- Then Accusation (separate from riddle decode).
+- Intent: synthesis of Case Notes + cipher; Ostrin is the truthful trap.
+
 ## Greenfield (not started — new schema + routes later)
 
 These have **no tables or routes to extend today**. When built, add them as
@@ -90,7 +119,24 @@ new Prisma models and App Router surfaces:
 
 - Admin dashboard (`admin_actions`, organiser auth, live team table, unstick,
   pause/resume, broadcast, CSV, print sheet, start-queue)
-- Hints / Carnival Tokens (`hints`)
+- **Hints / Carnival Tokens** (`hints`) — design: 2 tokens per team; spend at
+  a node for approach-only help; cost **+3 minutes**. Not built. Token copy
+  may name a Mark **class** or “revisit the Case Note from tent X”; it must
+  **never** reveal TRUTH/LIE, plaintext/decoded riddle, cipher word, or next
+  location name. (Post-verdict location riddles in templates are progression,
+  not token content.)
+- **Madame Vireya optional side-tent** — design: off-path visit costs
+  **5 minutes** for one free suspect elimination. Not built. Distinct from
+  story node 0 (The Divination Tent), which is the mandatory Act I fortune
+  teller cleared by a normal correct verdict.
 - Event pause / config (`game_config`, `paused_seconds`)
-- Leaderboard / spectator, PWA offline queue, geofencing, volunteer word
+- Leaderboard / spectator, PWA offline queue, geofencing, hourly volunteer-word
+  rotation (admin)
 - Supabase/Postgres cutover (Auth + Realtime) when leaving local SQLite
+
+**Playtest note (costs):** Act II/III Case Notes, Mark IV, and two-step cipher
+make a +3 min Mark-narrowing token more valuable than in the original prompt
+(a wrong verdict still costs +5 min decoy travel). Keep **+3 min / 2 tokens**
+and **Vireya side +5 min / one free elim** as first-ship defaults; prefer
+spend gates (e.g. tokens only from Act II+, or Act I teaching-only text) over
+silently raising costs. Revisit (+5 min or 1 token) only after playtest data.
