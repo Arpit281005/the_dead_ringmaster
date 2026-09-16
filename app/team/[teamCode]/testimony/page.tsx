@@ -17,7 +17,7 @@ export default async function TestimonyPage({
   if (state.phase === "finished") redirect(`/team/${teamCode}/reveal`);
 
   const current = state.currentNode!;
-  const node = await getNodeTestimony(current.id);
+  const node = await getNodeTestimony(teamCode, current.id);
   if (!node) notFound();
 
   return (
@@ -25,7 +25,7 @@ export default async function TestimonyPage({
       <VerdictPanel
         teamCode={teamCode}
         nodeId={node.id}
-        suspectName={node.suspect?.name ?? "A Voice from the Dark"}
+        suspectName={node.suspectName}
         locationName={node.locationName}
         testimonyText={node.testimonyText}
         retrying={Boolean(state.lastVerdict && !state.lastVerdict.wasCorrect)}

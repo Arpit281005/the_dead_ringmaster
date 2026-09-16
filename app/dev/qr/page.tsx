@@ -20,6 +20,7 @@ export default async function DevQrPage() {
       act: true,
       locationName: true,
       locationDescription: true,
+      decoyPool: true,
       suspect: { select: { name: true } },
     },
   });
@@ -46,7 +47,9 @@ export default async function DevQrPage() {
         {withQr.map(({ node, payload, qr }) => (
           <div key={node.id} className="paper-card rounded-sm p-4 flex flex-col items-center gap-2 text-center">
             <p className="font-chrome text-[10px] uppercase tracking-wide text-ink/50">
-              {node.isDecoy ? "Decoy" : `Tent ${node.sequenceIndex + 1} · Act ${node.act}`}
+              {node.isDecoy
+                ? `Decoy · pool ${node.decoyPool ?? "?"}`
+                : `Tent ${node.sequenceIndex + 1} · Act ${node.act}`}
             </p>
             <p className="font-display font-bold">{node.locationName}</p>
             {node.suspect && <p className="text-xs text-ink/60">{node.suspect.name}</p>}

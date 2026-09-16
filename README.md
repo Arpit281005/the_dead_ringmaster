@@ -29,7 +29,7 @@ Schema continues to live in [`prisma/schema.prisma`](./prisma/schema.prisma).
 cp .env.example .env   # set DATABASE_URL and QR_HMAC_SECRET
 npm install
 npx prisma migrate dev   # creates prisma/dev.db
-npx prisma db seed       # loads suspects, nodes, decoys, testimonies
+npx prisma db seed       # loads suspects, locations, decoy pools
 npm run dev
 ```
 
@@ -41,14 +41,18 @@ In **development only**, visit `/dev/qr` for a page listing every node's
 location, signed QR image, and payload — scan them with a phone camera pointed
 at the screen, or copy the payload into the scanner's manual-entry field.
 This route returns 404 in production. It is a testing helper, not the
-organiser print sheet from the spec.
+organiser print sheet from the spec. Place **all** decoys in each act pool
+(three per act).
 
 ## How the story data works
 
-All narrative content (testimonies, riddles, mirrored riddles, decoy
-passages, suspects, Mark violations) lives in [prisma/seed.ts](./prisma/seed.ts).
-Edit it and re-run `npx prisma db seed` to change the story, swap in a real
-campus map, or set a different murderer.
+**Structural** data (suspects, story locations, decoy locations) lives in
+[prisma/seed.ts](./prisma/seed.ts). **Solvable narrative** (whether a
+testimony is truthful, which Mark is broken, wording, riddles, which decoy a
+wrong verdict requires) is computed server-side by
+[`lib/node-content`](./lib/node-content) from each team's stable `teamSeed`
+(derived from `teamCode` at registration). Two teams at the same tent will not
+share the same Truth/Lie answer or decoy target.
 
 The murderer is fixed as **Ostrin the Puppeteer** per the spec's default. His
 node never grants a suspect clearance regardless of verdict — that's
@@ -56,21 +60,20 @@ intentional, not a bug.
 
 ## Game logic notes
 
-- **Riddle mechanic**: each node stores one plain riddle and one mirrored
-  riddle. The app shows `riddlePlain` if the team says TRUTH, `riddleMirrored`
-  if they say LIE — regardless of whether that verdict is correct. Because of
-  how the content is authored, the *correct* verdict's reading always points
-  to the real next tent, and the incorrect one points to that node's decoy.
-- **Wrong verdicts don't lock a team out.** They cost a scan at the paired
+- **Per-team variation**: `resolveNodeContent(sequenceIndex, teamSeed)` picks
+  `isTruthful`, Mark-bearing detail, riddle text, and a decoy from that node's
+  act pool. Content is returned only after a valid scan (testimony page) or
+  inside verdict/decoy Server Actions — never on Midway props for locked tents.
+- **Riddle mechanic**: the app shows the plain riddle if the team says TRUTH,
+  the mirrored riddle if they say LIE. The *correct* choice always points to
+  the next story tent; the incorrect choice points to that team's seeded decoy.
+- **Wrong verdicts don't lock a team out.** They cost a scan at the seeded
   decoy tent (+5 min penalty) and a themed "misled" passage, after which the
-  team can submit a fresh verdict for the same testimony. This matches the
-  source spec ("does not reveal the answer — they must re-submit the verdict
-  in-app").
+  team can submit a fresh verdict for the same testimony.
 - **Sequence enforcement** is server-side only: every scan and verdict is
   validated against `team.currentIndex` via Server Actions. QR payloads are
   HMAC-signed (`nodeId.nonce.mac`); scans are rate-limited (~10/min/team);
-  decoy penalties are idempotent per wrong-verdict cycle. Midway loads only
-  non-sensitive node fields; testimony text is fetched after a valid scan.
+  decoy penalties are idempotent per wrong-verdict cycle.
 
 ## Greenfield (not started — new schema + routes later)
 

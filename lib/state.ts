@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
 export { formatDuration } from "@/lib/format";
 
 export const TOTAL_STORY_NODES = 8;
@@ -50,17 +51,50 @@ export async function getAllSuspectsPublic() {
   });
 }
 
-/** Testimony content — fetch only after phase === "testimony" (valid scan). */
-export async function getNodeTestimony(nodeId: string) {
-  return prisma.node.findUnique({
+async function loadDecoyRefs(): Promise<DecoyRef[]> {
+  const decoys = await prisma.node.findMany({
+    where: { isDecoy: true },
+    select: { id: true, locationName: true, decoyPool: true },
+  });
+  return decoys
+    .filter((d): d is typeof d & { decoyPool: string } => Boolean(d.decoyPool))
+    .map((d) => ({ id: d.id, locationName: d.locationName, decoyPool: d.decoyPool }));
+}
+
+/**
+ * Testimony content — only after a valid scan (caller must enforce phase).
+ * Resolved from teamSeed; never reads static narrative columns.
+ */
+export async function getNodeTestimony(teamCode: string, nodeId: string) {
+  const team = await getTeamByCode(teamCode);
+  if (!team) return null;
+
+  const node = await prisma.node.findUnique({
     where: { id: nodeId },
     select: {
       id: true,
-      testimonyText: true,
+      sequenceIndex: true,
+      isDecoy: true,
       locationName: true,
       suspect: { select: { name: true } },
     },
   });
+  if (!node || node.isDecoy) return null;
+
+  const scan = await prisma.scan.findFirst({
+    where: { teamId: team.id, nodeId: node.id, wasValid: true },
+  });
+  if (!scan) return null;
+
+  const decoys = await loadDecoyRefs();
+  const resolved = resolveNodeContent(node.sequenceIndex, team.teamSeed, decoys);
+
+  return {
+    id: node.id,
+    locationName: node.locationName,
+    suspectName: node.suspect?.name ?? "A Voice from the Dark",
+    testimonyText: resolved.testimonyText,
+  };
 }
 
 export async function getTeamState(teamCode: string) {

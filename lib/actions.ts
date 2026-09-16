@@ -5,6 +5,8 @@ import { TOTAL_STORY_NODES } from "@/lib/state";
 import { SOLUTION_TEXT } from "@/lib/content";
 import { verifySignedQrPayload } from "@/lib/qr-token";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { deriveTeamSeed } from "@/lib/team-seed";
+import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
 import { customAlphabet } from "nanoid";
 
 const DECOY_PENALTY_SECONDS = 5 * 60;
@@ -16,6 +18,21 @@ function generateTeamCode(name: string) {
   const words = name.match(NAME_WORDS) ?? ["VEX"];
   const prefix = (words[0].slice(0, 4) || "VEX").toUpperCase();
   return `${prefix}-${codeDigits()}`;
+}
+
+async function loadDecoyRefs(): Promise<DecoyRef[]> {
+  const decoys = await prisma.node.findMany({
+    where: { isDecoy: true },
+    select: { id: true, locationName: true, decoyPool: true },
+  });
+  return decoys
+    .filter((d): d is typeof d & { decoyPool: string } => Boolean(d.decoyPool))
+    .map((d) => ({ id: d.id, locationName: d.locationName, decoyPool: d.decoyPool }));
+}
+
+async function resolveForTeam(teamSeed: string, sequenceIndex: number) {
+  const decoys = await loadDecoyRefs();
+  return resolveNodeContent(sequenceIndex, teamSeed, decoys);
 }
 
 export type ActionResult<T> =
@@ -48,6 +65,7 @@ export async function createTeam(input: {
       name,
       members: JSON.stringify(members),
       contact,
+      teamSeed: deriveTeamSeed(teamCode),
       currentIndex: 0,
     },
   });
@@ -103,10 +121,12 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
       where: { teamId: team.id, node: { sequenceIndex: team.currentIndex } },
       orderBy: { submittedAt: "desc" },
     });
-    const servesCurrent =
-      lastVerdict &&
-      !lastVerdict.wasCorrect &&
-      node.decoyForIndexes?.split(",").map(Number).includes(team.currentIndex);
+
+    const resolved =
+      lastVerdict && !lastVerdict.wasCorrect
+        ? await resolveForTeam(team.teamSeed, team.currentIndex)
+        : null;
+    const servesCurrent = Boolean(resolved && resolved.decoyNodeId === node.id);
 
     if (!servesCurrent) {
       await prisma.scan.create({
@@ -124,7 +144,7 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
         teamId: team.id,
         nodeId: node.id,
         wasValid: true,
-        scannedAt: { gt: lastVerdict.submittedAt },
+        scannedAt: { gt: lastVerdict!.submittedAt },
       },
     });
     if (existingDecoy) {
@@ -195,6 +215,7 @@ export async function submitVerdict(
 
   const node = await prisma.node.findUnique({ where: { id: nodeId }, include: { suspect: true } });
   if (!node) return { ok: false, error: "Testimony not found." };
+  if (node.isDecoy) return { ok: false, error: "Testimony not found." };
   if (node.sequenceIndex !== team.currentIndex) {
     return { ok: false, error: "This testimony is no longer active for your team." };
   }
@@ -220,8 +241,9 @@ export async function submitVerdict(
     }
   }
 
-  const wasCorrect = (choice === "TRUTH") === node.isTruthful;
-  const riddle = choice === "TRUTH" ? node.riddlePlain : node.riddleMirrored;
+  const resolved = await resolveForTeam(team.teamSeed, node.sequenceIndex);
+  const wasCorrect = (choice === "TRUTH") === resolved.isTruthful;
+  const riddle = choice === "TRUTH" ? resolved.riddlePlain : resolved.riddleMirrored;
 
   await prisma.verdict.create({
     data: { teamId: team.id, nodeId: node.id, choice, wasCorrect },
@@ -232,7 +254,7 @@ export async function submitVerdict(
   let huntComplete = false;
 
   if (wasCorrect) {
-    if (node.clearReason && node.suspectId) {
+    if (resolved.clearReason && node.suspectId) {
       const already = await prisma.clearance.findFirst({
         where: { teamId: team.id, suspectId: node.suspectId },
       });
@@ -242,7 +264,7 @@ export async function submitVerdict(
             teamId: team.id,
             suspectId: node.suspectId,
             nodeId: node.id,
-            reason: node.clearReason,
+            reason: resolved.clearReason,
           },
         });
       }

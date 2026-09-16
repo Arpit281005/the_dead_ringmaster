@@ -26,29 +26,19 @@ model Suspect {
 
 model Node {
   id                  String  @id @default(cuid())
-  sequenceIndex       Int     @unique // 0..7 story nodes; -1 reserved (unused)
+  sequenceIndex       Int     @unique // 0..7 story nodes; negative for decoys
   suspectId           String?
   suspect             Suspect? @relation(fields: [suspectId], references: [id])
 
   locationName        String
   locationDescription String
-  act                 Int // 1, 2, or 3
-
-  testimonyText       String
-  isTruthful          Boolean
-  brokenMark          String // NONE | THREE | CASEFILE | NAME
-
-  riddlePlain         String
-  riddleMirrored       String
-  mirrorStyle          String // directional | negation | reversed | antonym
-
-  clearReason          String? // shown on deduction board when cleared; null for the murderer's node
+  act                 Int // 1, 2, or 3 (0 for decoys)
 
   token                String  @unique // opaque nonce bound into HMAC QR payload (nodeId.nonce.mac)
 
   isDecoy              Boolean @default(false)
-  decoyForIndexes      String? // comma-separated sequenceIndex list this decoy serves, when isDecoy
-  decoyPassage          String? // "you have been misled" text, when isDecoy
+  decoyPool            String? // act1 | act2 | act3 — pool membership when isDecoy
+  decoyPassage         String? // "you have been misled" text, when isDecoy
 
   scans                Scan[]
   verdicts              Verdict[]
@@ -61,6 +51,7 @@ model Team {
   name           String
   members        String // JSON-encoded string[]
   contact        String
+  teamSeed       String // SHA-256(teamCode) prefix — stable per team for content variation
 
   currentIndex   Int       @default(0) // sequenceIndex of the node currently in play
   penaltySeconds Int       @default(0)
