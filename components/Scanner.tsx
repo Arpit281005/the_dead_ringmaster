@@ -122,7 +122,7 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
             value={manualToken}
             onChange={(e) => setManualToken(e.target.value)}
             className="flex-1 border border-ink/30 bg-parchment px-3 py-3 rounded-sm font-chrome tracking-wide focus:outline-none focus:border-oxblood"
-            placeholder="e.g. j2k9m4p7qz"
+            placeholder="Paste signed tent code"
             autoCapitalize="off"
             autoCorrect="off"
           />

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getTeamState, getAllSuspects } from "@/lib/state";
+import { getTeamState, getAllSuspectsPublic } from "@/lib/state";
 import { prisma } from "@/lib/db";
 import TeamHeader from "@/components/TeamHeader";
 import SuspectCard from "@/components/SuspectCard";
@@ -14,7 +14,7 @@ export default async function BoardPage({
   if (state.phase === "not-found" || !state.team) notFound();
 
   const { team, clearances } = state;
-  const suspects = await getAllSuspects();
+  const suspects = await getAllSuspectsPublic();
   const notes = await prisma.teamNote.findMany({ where: { teamId: team.id } });
 
   const clearanceBySuspect = new Map(clearances.map((c) => [c.suspectId, c]));

@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getTeamState, getAllSuspects } from "@/lib/state";
+import { getTeamState, getAllSuspectsPublic } from "@/lib/state";
 import AccusationForm from "@/components/AccusationForm";
 
 export default async function AccusePage({
@@ -13,9 +13,16 @@ export default async function AccusePage({
   if (state.phase === "finished") redirect(`/team/${teamCode}/reveal`);
   if (state.phase !== "accusation") redirect(`/team/${teamCode}`);
 
-  const suspects = await getAllSuspects();
+  const suspects = await getAllSuspectsPublic();
   const clearedIds = new Set(state.clearances.map((c) => c.suspectId));
-  const uncleared = suspects.filter((s) => !clearedIds.has(s.id));
+  const uncleared = suspects
+    .filter((s) => !clearedIds.has(s.id))
+    .map((s) => ({
+      id: s.id,
+      name: s.name,
+      role: s.role,
+      flavourText: s.flavourText,
+    }));
 
   return (
     <main className="flex-1 px-5 py-8 max-w-md mx-auto w-full">

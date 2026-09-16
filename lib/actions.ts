@@ -3,9 +3,12 @@
 import { prisma } from "@/lib/db";
 import { TOTAL_STORY_NODES } from "@/lib/state";
 import { SOLUTION_TEXT } from "@/lib/content";
+import { verifySignedQrPayload } from "@/lib/qr-token";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { customAlphabet } from "nanoid";
 
 const DECOY_PENALTY_SECONDS = 5 * 60;
+const SCAN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
 const codeDigits = customAlphabet("0123456789", 4);
 const NAME_WORDS = /[A-Za-z]+/g;
 
@@ -65,12 +68,32 @@ type ScanResult =
   | { valid: false; reason: string };
 
 export async function scanNode(teamCode: string, rawToken: string): Promise<ActionResult<ScanResult>> {
-  const token = rawToken.trim();
   const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
   if (!team) return { ok: false, error: "Team not found." };
   if (team.status === "FINISHED") return { ok: false, error: "This team has already finished the hunt." };
 
-  const node = await prisma.node.findUnique({ where: { token } });
+  const rate = checkRateLimit(`scan:${team.id}`, SCAN_RATE_LIMIT);
+  if (!rate.allowed) {
+    return {
+      ok: true,
+      data: {
+        valid: false,
+        reason: "Too many attempts — wait a moment before scanning again.",
+      },
+    };
+  }
+
+  const verified = verifySignedQrPayload(rawToken);
+  if (!verified) {
+    return {
+      ok: true,
+      data: { valid: false, reason: "That code doesn't match any tent in the fairground." },
+    };
+  }
+
+  const node = await prisma.node.findFirst({
+    where: { id: verified.nodeId, token: verified.nonce },
+  });
   if (!node) {
     return { ok: true, data: { valid: false, reason: "That code doesn't match any tent in the fairground." } };
   }
@@ -92,6 +115,27 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
       return {
         ok: true,
         data: { valid: false, reason: "This dead end isn't yours to find — not yet, anyway." },
+      };
+    }
+
+    // Idempotent: same decoy after this wrong verdict must not double-penalise.
+    const existingDecoy = await prisma.scan.findFirst({
+      where: {
+        teamId: team.id,
+        nodeId: node.id,
+        wasValid: true,
+        scannedAt: { gt: lastVerdict.submittedAt },
+      },
+    });
+    if (existingDecoy) {
+      return {
+        ok: true,
+        data: {
+          valid: true,
+          kind: "decoy",
+          passage: node.decoyPassage ?? "You have been misled.",
+          locationName: node.locationName,
+        },
       };
     }
 
@@ -250,6 +294,13 @@ export async function submitAccusation(
   const suspect = await prisma.suspect.findUnique({ where: { id: suspectId } });
   if (!suspect) return { ok: false, error: "Name a suspect from the board." };
   if (!reasoning.trim()) return { ok: false, error: "Give one sentence of reasoning." };
+
+  const cleared = await prisma.clearance.findFirst({
+    where: { teamId: team.id, suspectId },
+  });
+  if (cleared) {
+    return { ok: false, error: "That suspect has already been cleared — name who remains." };
+  }
 
   const wasCorrect = suspect.isMurderer;
   const murderer = await prisma.suspect.findFirst({ where: { isMurderer: true } });

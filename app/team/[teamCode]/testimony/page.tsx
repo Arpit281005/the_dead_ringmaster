@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getTeamState } from "@/lib/state";
+import { getTeamState, getNodeTestimony } from "@/lib/state";
 import VerdictPanel from "@/components/VerdictPanel";
 
 export default async function TestimonyPage({
@@ -16,7 +16,9 @@ export default async function TestimonyPage({
   if (state.phase === "accusation") redirect(`/team/${teamCode}/accuse`);
   if (state.phase === "finished") redirect(`/team/${teamCode}/reveal`);
 
-  const node = state.currentNode!;
+  const current = state.currentNode!;
+  const node = await getNodeTestimony(current.id);
+  if (!node) notFound();
 
   return (
     <main className="flex-1 px-5 py-8 max-w-md mx-auto w-full">

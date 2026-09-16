@@ -11,6 +11,19 @@ export type TeamPhase =
   | "accusation"
   | "finished";
 
+/** Midway / phase fields only — never includes testimony, riddles, isTruthful, or token. */
+const storyNodePublicSelect = {
+  id: true,
+  sequenceIndex: true,
+  suspectId: true,
+  locationName: true,
+  locationDescription: true,
+  act: true,
+  suspect: { select: { id: true, name: true } },
+} as const;
+
+export type StoryNodePublic = Awaited<ReturnType<typeof getAllStoryNodes>>[number];
+
 export async function getTeamByCode(teamCode: string) {
   return prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
 }
@@ -19,12 +32,35 @@ export async function getAllStoryNodes() {
   return prisma.node.findMany({
     where: { isDecoy: false },
     orderBy: { sequenceIndex: "asc" },
-    include: { suspect: true },
+    select: storyNodePublicSelect,
   });
 }
 
-export async function getAllSuspects() {
-  return prisma.suspect.findMany({ orderBy: { order: "asc" } });
+/** Safe suspect fields for client components — never includes isMurderer. */
+export async function getAllSuspectsPublic() {
+  return prisma.suspect.findMany({
+    orderBy: { order: "asc" },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      flavourText: true,
+      order: true,
+    },
+  });
+}
+
+/** Testimony content — fetch only after phase === "testimony" (valid scan). */
+export async function getNodeTestimony(nodeId: string) {
+  return prisma.node.findUnique({
+    where: { id: nodeId },
+    select: {
+      id: true,
+      testimonyText: true,
+      locationName: true,
+      suspect: { select: { name: true } },
+    },
+  });
 }
 
 export async function getTeamState(teamCode: string) {
@@ -39,7 +75,7 @@ export async function getTeamState(teamCode: string) {
   });
   const accusation = await prisma.accusation.findUnique({
     where: { teamId: team.id },
-    include: { suspect: true },
+    include: { suspect: { select: { id: true, name: true } } },
   });
 
   if (team.status === "FINISHED" || accusation) {

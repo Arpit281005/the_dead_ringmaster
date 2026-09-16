@@ -6,21 +6,27 @@ A mobile-first web app for a live, campus-wide detective hunt. Built from
 This build covers the **core player loop**: team registration, the Midway map,
 QR/manual scanning, testimony + verdict + mirror-riddle resolution, the
 dead-end/decoy penalty path, the deduction board, and the accusation + reveal.
-The organiser admin dashboard, PWA offline queue, spectator screen, and
-HMAC-signed QR tokens from the full spec are **not** built yet — see
-"What's not built" below.
+
+## Platform decision
+
+**Stay on Prisma + SQLite for now.** The build prompt’s Supabase/Postgres +
+Auth + Realtime path is deferred until deploy. Do not introduce a parallel
+Supabase client or SQL migration tree until that cutover is intentional.
+Schema continues to live in [`prisma/schema.prisma`](./prisma/schema.prisma).
 
 ## Stack
 
 - Next.js 16 (App Router, Server Actions)
-- Prisma + SQLite (local dev database — swap the datasource for Postgres/Supabase to deploy)
+- Prisma + SQLite (local; Postgres/Supabase only when we deliberately migrate)
 - Tailwind CSS + Framer Motion
 - `html5-qrcode` for camera scanning, with a manual code-entry fallback
-- `qrcode` for generating QR images on the dev helper page
+- HMAC-SHA256 signed QR payloads (`QR_HMAC_SECRET`)
+- `qrcode` for generating QR images on the **dev-only** helper page
 
 ## Running it
 
 ```bash
+cp .env.example .env   # set DATABASE_URL and QR_HMAC_SECRET
 npm install
 npx prisma migrate dev   # creates prisma/dev.db
 npx prisma db seed       # loads suspects, nodes, decoys, testimonies
@@ -31,10 +37,11 @@ Open `http://localhost:3000`.
 
 ## Testing the hunt without printed QR codes
 
-Visit `/dev/qr` for a page listing every node's location, QR image, and raw
-token — scan them with a phone camera pointed at the screen, or copy the
-token into the scanner's manual-entry field. This is a testing helper, not
-the organiser print sheet from the spec.
+In **development only**, visit `/dev/qr` for a page listing every node's
+location, signed QR image, and payload — scan them with a phone camera pointed
+at the screen, or copy the payload into the scanner's manual-entry field.
+This route returns 404 in production. It is a testing helper, not the
+organiser print sheet from the spec.
 
 ## How the story data works
 
@@ -60,17 +67,19 @@ intentional, not a bug.
   source spec ("does not reveal the answer — they must re-submit the verdict
   in-app").
 - **Sequence enforcement** is server-side only: every scan and verdict is
-  validated against `team.currentIndex` via Server Actions, and future
-  testimony/riddle text is never sent to the client before a valid scan.
-  Tokens are opaque random strings rather than HMAC-signed payloads (the full
-  spec's signing scheme was out of scope for this pass).
+  validated against `team.currentIndex` via Server Actions. QR payloads are
+  HMAC-signed (`nodeId.nonce.mac`); scans are rate-limited (~10/min/team);
+  decoy penalties are idempotent per wrong-verdict cycle. Midway loads only
+  non-sensitive node fields; testimony text is fetched after a valid scan.
 
-## What's not built (see the build prompt for full detail)
+## Greenfield (not started — new schema + routes later)
 
-- teaAdmin dashboard (live m table, manual unstick, pause/resume, broadcast, CSV export)
-- Organiser QR print sheet (A4 layout with volunteer instructions)
-- Leaderboard and spectator screen
-- PWA / offline scan queue
-- HMAC-signed QR payloads, rate limiting, geofencing
-- Carnival Tokens, Madame Vireya's side tent, the Fortune Card share image, volunteer word
-- Deployment to Vercel / Supabase (currently local SQLite only)
+These have **no tables or routes to extend today**. When built, add them as
+new Prisma models and App Router surfaces:
+
+- Admin dashboard (`admin_actions`, organiser auth, live team table, unstick,
+  pause/resume, broadcast, CSV, print sheet, start-queue)
+- Hints / Carnival Tokens (`hints`)
+- Event pause / config (`game_config`, `paused_seconds`)
+- Leaderboard / spectator, PWA offline queue, geofencing, volunteer word
+- Supabase/Postgres cutover (Auth + Realtime) when leaving local SQLite

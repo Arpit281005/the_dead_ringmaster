@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTeamState, getAllSuspects, TOTAL_STORY_NODES } from "@/lib/state";
+import { getTeamState, getAllSuspectsPublic, TOTAL_STORY_NODES } from "@/lib/state";
 import TeamHeader from "@/components/TeamHeader";
 import { prisma } from "@/lib/db";
 
@@ -14,7 +14,7 @@ export default async function MidwayPage({
   if (state.phase === "not-found" || !state.team) notFound();
 
   const { team, nodes, clearances, phase } = state;
-  const suspects = await getAllSuspects();
+  const suspects = await getAllSuspectsPublic();
 
   const correctVerdicts = await prisma.verdict.findMany({
     where: { teamId: team.id, wasCorrect: true },

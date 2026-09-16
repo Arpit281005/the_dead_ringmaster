@@ -44,7 +44,7 @@ model Node {
 
   clearReason          String? // shown on deduction board when cleared; null for the murderer's node
 
-  token                String  @unique // opaque QR payload for this node
+  token                String  @unique // opaque nonce bound into HMAC QR payload (nodeId.nonce.mac)
 
   isDecoy              Boolean @default(false)
   decoyForIndexes      String? // comma-separated sequenceIndex list this decoy serves, when isDecoy
