@@ -12,6 +12,7 @@ const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 
 async function main() {
   console.log("Clearing existing data...");
+  await prisma.adminAction.deleteMany();
   await prisma.securityFlag.deleteMany();
   await prisma.teamDevice.deleteMany();
   await prisma.accusation.deleteMany();
@@ -23,6 +24,11 @@ async function main() {
   await prisma.team.deleteMany();
   await prisma.node.deleteMany();
   await prisma.suspect.deleteMany();
+  await prisma.gameConfig.deleteMany();
+
+  await prisma.gameConfig.create({
+    data: { id: "singleton", eventName: "The Carnival of Lies" },
+  });
 
   console.log("Seeding suspects...");
   const suspects = await Promise.all([

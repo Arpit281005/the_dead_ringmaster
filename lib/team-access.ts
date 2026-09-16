@@ -10,6 +10,8 @@ export type TeamPublic = {
   startedAt: Date;
   finishedAt: Date | null;
   penaltySeconds: number;
+  pausedSeconds: number;
+  organiserHint: string | null;
 };
 
 export function toTeamPublic(team: {
@@ -21,6 +23,8 @@ export function toTeamPublic(team: {
   startedAt: Date;
   finishedAt: Date | null;
   penaltySeconds: number;
+  pausedSeconds: number;
+  organiserHint: string | null;
 }): TeamPublic {
   return {
     id: team.id,
@@ -31,6 +35,8 @@ export function toTeamPublic(team: {
     startedAt: team.startedAt,
     finishedAt: team.finishedAt,
     penaltySeconds: team.penaltySeconds,
+    pausedSeconds: team.pausedSeconds,
+    organiserHint: team.organiserHint,
   };
 }
 

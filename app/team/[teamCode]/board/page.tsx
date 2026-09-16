@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTeamState, getAllSuspectsPublic } from "@/lib/state";
+import { getGameConfig } from "@/lib/admin-team-insight";
 import { prisma } from "@/lib/db";
 import TeamHeader from "@/components/TeamHeader";
 import SuspectCard from "@/components/SuspectCard";
@@ -15,6 +16,7 @@ export default async function BoardPage({
 
   const { team, clearances } = state;
   const suspects = await getAllSuspectsPublic();
+  const config = await getGameConfig();
   const notes = await prisma.teamNote.findMany({ where: { teamId: team.id } });
   const facts = await prisma.teamFact.findMany({
     where: { teamId: team.id },
@@ -32,6 +34,10 @@ export default async function BoardPage({
         startedAt={team.startedAt}
         finishedAt={team.finishedAt}
         penaltySeconds={team.penaltySeconds}
+        pausedSeconds={team.pausedSeconds}
+        isPaused={config.isPaused}
+        broadcastMessage={config.broadcastMessage}
+        organiserHint={team.organiserHint}
         clearedCount={clearances.length}
         totalSuspects={suspects.length}
         active="board"

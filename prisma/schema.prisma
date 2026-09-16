@@ -61,6 +61,10 @@ model Team {
 
   currentIndex   Int       @default(0) // sequenceIndex of the node currently in play
   penaltySeconds Int       @default(0)
+  /** Accumulated global-pause time (seconds) for fair clock. */
+  pausedSeconds  Int       @default(0)
+  /** Organiser hint text shown on Midway when set. */
+  organiserHint  String?
   status         String    @default("ACTIVE") // ACTIVE | FINISHED
 
   startedAt      DateTime  @default(now())
@@ -74,6 +78,26 @@ model Team {
   accusation     Accusation?
   devices        TeamDevice[]
   securityFlags  SecurityFlag[]
+  adminActions   AdminAction[]
+}
+
+model GameConfig {
+  id               String    @id @default("singleton")
+  eventName        String    @default("The Carnival of Lies")
+  isPaused         Boolean   @default(false)
+  pausedAt         DateTime?
+  broadcastMessage String?
+  broadcastAt      DateTime?
+}
+
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminLabel String   @default("organiser")
+  teamId     String?
+  team       Team?    @relation(fields: [teamId], references: [id])
+  actionType String
+  payload    String   // JSON
+  createdAt  DateTime @default(now())
 }
 
 model TeamDevice {

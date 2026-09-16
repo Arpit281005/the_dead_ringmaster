@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTeamState, getAllSuspectsPublic, TOTAL_STORY_NODES } from "@/lib/state";
+import { getGameConfig } from "@/lib/admin-team-insight";
 import TeamHeader from "@/components/TeamHeader";
 import { prisma } from "@/lib/db";
 
@@ -15,6 +16,7 @@ export default async function MidwayPage({
 
   const { team, nodes, clearances, phase } = state;
   const suspects = await getAllSuspectsPublic();
+  const config = await getGameConfig();
 
   const correctVerdicts = await prisma.verdict.findMany({
     where: { teamId: team.id, wasCorrect: true },
@@ -32,6 +34,10 @@ export default async function MidwayPage({
         startedAt={team.startedAt}
         finishedAt={team.finishedAt}
         penaltySeconds={team.penaltySeconds}
+        pausedSeconds={team.pausedSeconds}
+        isPaused={config.isPaused}
+        broadcastMessage={config.broadcastMessage}
+        organiserHint={team.organiserHint}
         clearedCount={clearances.length}
         totalSuspects={suspects.length}
         active="midway"

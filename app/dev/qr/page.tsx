@@ -41,8 +41,12 @@ export default async function DevQrPage() {
     <main className="flex-1 px-5 py-8 max-w-4xl mx-auto w-full">
       <h1 className="font-display text-2xl font-black mb-1">Dev QR Sheet</h1>
       <p className="text-sm text-ink/60 mb-8">
-        Development helper only — hidden in production. Scan these with the in-app scanner or
-        paste the signed payload under each code.
+        Development helper only — hidden in production. For the organiser print
+        sheet (decoys by pool), use{" "}
+        <a href="/admin/print" className="underline">
+          /admin/print
+        </a>{" "}
+        after signing in.
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {withQr.map(({ node, payload, qr }) => (

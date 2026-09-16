@@ -26,7 +26,7 @@ Schema continues to live in [`prisma/schema.prisma`](./prisma/schema.prisma).
 ## Running it
 
 ```bash
-cp .env.example .env   # set DATABASE_URL and QR_HMAC_SECRET
+cp .env.example .env   # set DATABASE_URL, QR_HMAC_SECRET, ADMIN_PASSWORD
 npm install
 npx prisma migrate dev   # creates prisma/dev.db
 npx prisma db seed       # loads suspects, locations, decoy pools
@@ -137,13 +137,19 @@ intentional, not a bug.
 - Then Accusation (separate from riddle decode).
 - Intent: synthesis of Case Notes + cipher; Ostrin is the truthful trap.
 
+## Organiser admin
+
+Sign in at `/admin` with `ADMIN_PASSWORD` (dev default `carnival-dev-admin` if
+unset). Live team table, force-advance / void penalty / grant hint, global
+pause+broadcast, security flags (review only), per-team seeded variant + Case
+Notes + accusation readiness, QR print sheet (decoys by pool) at `/admin/print`,
+CSV at `/admin/export`. Mutations append to `AdminAction`; flag views do not.
+
 ## Greenfield (not started — new schema + routes later)
 
 These have **no tables or routes to extend today**. When built, add them as
 new Prisma models and App Router surfaces:
 
-- Admin dashboard (`admin_actions`, organiser auth, live team table, unstick,
-  pause/resume, broadcast, CSV, print sheet, start-queue)
 - Hints / Carnival Tokens (`hints`) — design: 2 tokens per team; spend at
   a node for approach-only help; cost **+3 minutes**. Not built. When shipped,
   prefer mandatory token spend after 2 wrongs at a node over the current +10m
@@ -154,9 +160,8 @@ new Prisma models and App Router surfaces:
   **5 minutes** for one free suspect elimination. Not built. Distinct from
   story node 0 (The Divination Tent), which is the mandatory Act I fortune
   teller cleared by a normal correct verdict.
-- Event pause / config (`game_config`, `paused_seconds`)
 - Leaderboard / spectator, PWA offline queue, geofencing, hourly volunteer-word
-  rotation (admin)
+  rotation, start-queue
 - Supabase/Postgres cutover (Auth + Realtime) when leaving local SQLite
 
 **Playtest note (costs):** Act II/III Case Notes, Mark IV, and two-step cipher
