@@ -74,6 +74,12 @@ intentional, not a bug.
 - **Wrong verdicts don't lock a team out.** They cost a scan at the seeded
   decoy tent (+5 min penalty) and a themed "misled" passage, after which the
   team can submit a fresh verdict for the same testimony.
+- **Accusation**: name an uncleared suspect, a method/weapon, and a Case File
+  keystone fact (seeded per team from Ostrin's truthful variant). Method and
+  fact are graded by keyword token — wrong answers lower score for ranking but
+  never block finish or the reveal. One sentence of reasoning is kept for human
+  tie-breakers. The clock locks on submit; the reveal shows which of the three
+  structured parts matched (this team's submission only).
 - **Sequence enforcement** is server-side only: every scan and verdict is
   validated against `team.currentIndex` via Server Actions. QR payloads are
   HMAC-signed (`nodeId.nonce.mac`); scans are rate-limited (~10/min/team);

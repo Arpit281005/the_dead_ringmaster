@@ -376,12 +376,24 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     truthfulVariants: [
       {
         mark: "NONE",
+        accusationFactKeyword: "WEST_GATE",
         clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
+      },
+      {
+        mark: "NONE",
+        accusationFactKeyword: "GENERATOR",
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness, testing the joints, rehearsing the one line he insisted I include — three labours, nothing more. When the lights died and the yard went to lamplight I was still there with the wood. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. A puppeteer's hands were full that night.`,
+      },
+      {
+        mark: "NONE",
+        accusationFactKeyword: "BELL",
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing, testing, rehearsing — three labours. The carousel bell rang its last honest hour and I remember thinking the strings had gone quiet too. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. Wood does not confess to murder no matter how long you hold it.`,
       },
     ],
     lyingVariants: [
       {
         mark: "NONE",
+        accusationFactKeyword: "WEST_GATE",
         clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
       },
     ],

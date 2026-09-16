@@ -130,12 +130,18 @@ model TeamFact {
 }
 
 model Accusation {
-  id          String   @id @default(cuid())
-  teamId      String   @unique
-  team        Team     @relation(fields: [teamId], references: [id])
-  suspectId   String
-  suspect     Suspect  @relation(fields: [suspectId], references: [id])
-  reasoning   String
-  wasCorrect  Boolean
-  submittedAt DateTime @default(now())
+  id                   String   @id @default(cuid())
+  teamId               String   @unique
+  team                 Team     @relation(fields: [teamId], references: [id])
+  suspectId            String
+  suspect              Suspect  @relation(fields: [suspectId], references: [id])
+  methodSubmitted      String
+  factKeywordSubmitted String
+  reasoning            String
+  /** True when the accused suspect is the murderer (headline / name gate). */
+  wasCorrect           Boolean
+  suspectCorrect       Boolean
+  methodCorrect        Boolean
+  factCorrect          Boolean
+  submittedAt          DateTime @default(now())
 }

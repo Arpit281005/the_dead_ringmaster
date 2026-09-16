@@ -104,6 +104,7 @@ export function resolveNodeContent(
     keySource: template.keySource,
     cipherKey,
     keyPrompt: keyPromptFor(template.keySource),
+    accusationFactKeyword: variant.accusationFactKeyword?.toUpperCase() ?? null,
   };
 }
 

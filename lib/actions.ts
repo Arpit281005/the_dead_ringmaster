@@ -7,6 +7,11 @@ import { verifySignedQrPayload } from "@/lib/qr-token";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { deriveTeamSeed } from "@/lib/team-seed";
 import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
+import {
+  getAccusationExpectations,
+  extractMethodKeyword,
+  normalizeAccusationToken,
+} from "@/lib/node-content/accusation";
 import { normalizeCipherKey } from "@/lib/node-content/riddle-cipher";
 import { customAlphabet } from "nanoid";
 
@@ -436,11 +441,20 @@ export async function updateTeamNote(
   return { ok: true, data: null };
 }
 
-type AccusationResult = { wasCorrect: boolean; murdererName: string; solutionText: string };
+type AccusationResult = {
+  wasCorrect: boolean;
+  suspectCorrect: boolean;
+  methodCorrect: boolean;
+  factCorrect: boolean;
+  murdererName: string;
+  solutionText: string;
+};
 
 export async function submitAccusation(
   teamCode: string,
   suspectId: string,
+  method: string,
+  factKeyword: string,
   reasoning: string
 ): Promise<ActionResult<AccusationResult>> {
   const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
@@ -454,6 +468,10 @@ export async function submitAccusation(
 
   const suspect = await prisma.suspect.findUnique({ where: { id: suspectId } });
   if (!suspect) return { ok: false, error: "Name a suspect from the board." };
+  if (!method.trim()) return { ok: false, error: "Name the method or weapon." };
+  if (!factKeyword.trim()) {
+    return { ok: false, error: "Choose the Case File fact that seals their guilt." };
+  }
   if (!reasoning.trim()) return { ok: false, error: "Give one sentence of reasoning." };
 
   const cleared = await prisma.clearance.findFirst({
@@ -463,11 +481,30 @@ export async function submitAccusation(
     return { ok: false, error: "That suspect has already been cleared — name who remains." };
   }
 
-  const wasCorrect = suspect.isMurderer;
+  const decoys = await loadDecoyRefs();
+  const expectations = getAccusationExpectations(team.teamSeed, decoys);
+
+  const suspectCorrect = suspect.isMurderer;
+  const extractedMethod = extractMethodKeyword(method);
+  const methodCorrect = extractedMethod !== null && expectations.methodKeywords.has(extractedMethod);
+  const offeredFact = normalizeAccusationToken(factKeyword);
+  const factCorrect = offeredFact === expectations.factKeyword;
+  const wasCorrect = suspectCorrect;
+
   const murderer = await prisma.suspect.findFirst({ where: { isMurderer: true } });
 
   await prisma.accusation.create({
-    data: { teamId: team.id, suspectId, reasoning: reasoning.trim(), wasCorrect },
+    data: {
+      teamId: team.id,
+      suspectId,
+      methodSubmitted: method.trim(),
+      factKeywordSubmitted: offeredFact,
+      reasoning: reasoning.trim(),
+      wasCorrect,
+      suspectCorrect,
+      methodCorrect,
+      factCorrect,
+    },
   });
   await prisma.team.update({
     where: { id: team.id },
@@ -476,6 +513,13 @@ export async function submitAccusation(
 
   return {
     ok: true,
-    data: { wasCorrect, murdererName: murderer?.name ?? "Ostrin", solutionText: SOLUTION_TEXT },
+    data: {
+      wasCorrect,
+      suspectCorrect,
+      methodCorrect,
+      factCorrect,
+      murdererName: murderer?.name ?? "Ostrin",
+      solutionText: SOLUTION_TEXT,
+    },
   };
 }
