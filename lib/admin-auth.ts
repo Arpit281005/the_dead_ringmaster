@@ -6,10 +6,11 @@ const COOKIE = "carnival_admin";
 const MAX_AGE_SEC = 60 * 60 * 12; // 12h
 
 function getAdminPassword(): string | null {
-  const pw = process.env.ADMIN_PASSWORD;
+  // Bracket access avoids build-time inlining; trim handles Railway paste whitespace.
+  const pw = process.env["ADMIN_PASSWORD"]?.trim();
   if (pw && pw.length >= 8) return pw;
   if (process.env.NODE_ENV !== "production") {
-    return process.env.ADMIN_PASSWORD?.length ? process.env.ADMIN_PASSWORD : "carnival-dev-admin";
+    return pw?.length ? pw : "carnival-dev-admin";
   }
   return null;
 }
