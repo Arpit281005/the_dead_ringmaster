@@ -15,13 +15,17 @@ function resolveCipherKey(keySource: KeySource, volunteerWord?: string): string 
 function keyPromptFor(keySource: KeySource): string | null {
   if (!keySource) return null;
   if (keySource.type === "volunteer_word") {
-    return "Ask the tent volunteer for the cipher word.";
+    return "Find the cipher word in this testimony (or ask the tent volunteer).";
   }
-  return "Use the cipher word stamped on your Case Notes.";
+  return "Find the cipher stamp on your Case Notes from an earlier tent.";
 }
 
 /**
  * Pure server-side resolver. Never import from Client Components.
+ *
+ * RNG contract: salt "truth" is only for isTruthful (when seeded).
+ * Salt "default" is for decoy / variant / hint / mirror picks — do not insert
+ * calls before bool on the truth stream.
  */
 export function resolveNodeContent(
   sequenceIndex: number,
@@ -41,7 +45,11 @@ export function resolveNodeContent(
 
   const policy = template.truthPolicy ?? "seeded";
   const isTruthful =
-    policy === "fixed-true" ? true : policy === "fixed-false" ? false : rng.bool();
+    policy === "fixed-true"
+      ? true
+      : policy === "fixed-false"
+        ? false
+        : seededRng(teamSeed, sequenceIndex, "truth").bool();
 
   const variant = isTruthful ? rng.pick(template.truthfulVariants) : rng.pick(template.lyingVariants);
   const brokenMark = isTruthful ? "NONE" : variant.mark;
@@ -76,7 +84,7 @@ export function resolveNodeContent(
   let riddleMirrored: string;
 
   if (needsKey && cipherKey) {
-    // Act II+: both branches are stage1 = mirror(keyedObfuscate(plaintext))
+    // Act II+: Caesar only — easy to hand-decode once the key is known.
     riddlePlain = encodeStage1(plaintextPlain, cipherKey, mirrorStyle);
     riddleMirrored = encodeStage1(plaintextMirrored, cipherKey, mirrorStyle);
   } else {

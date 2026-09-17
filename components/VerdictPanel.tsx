@@ -112,14 +112,27 @@ export default function VerdictPanel({
 
         <div>
           <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">
-            {showKeyGate ? "The Cipher Reads" : "The Riddle Reads"}
+            {showKeyGate
+              ? "Cipher (not plain English yet)"
+              : "The Riddle Reads"}
           </p>
-          <p className="font-display text-lg leading-snug break-words">{displayRiddle}</p>
+          <p
+            className={
+              showKeyGate
+                ? "font-mono text-base leading-relaxed break-words tracking-wide text-ink/90"
+                : "font-display text-lg leading-snug break-words"
+            }
+          >
+            {displayRiddle}
+          </p>
         </div>
 
         {showKeyGate && (
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-ink/70">{result.keyPrompt}</p>
+            <p className="text-sm text-ink/70">
+              {result.keyPrompt ??
+                "Find the cipher word in this testimony or your Case Notes."}
+            </p>
             <div className="flex gap-2">
               <input
                 value={cipherInput}

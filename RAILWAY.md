@@ -161,6 +161,10 @@ Before major changes, download/copy the SQLite file from the volume
 4. **Remove** `FORCE_SEED` immediately.
 5. Re-print all QR stickers from `/admin/print`.
 
+**Shorter QR payloads** (8-char token + 16-char MAC): any deploy that ships
+this change **must** re-seed and re-print — old printed codes will fail verify.
+Do not roll out mid-hunt without re-registering teams.
+
 Changing `QR_HMAC_SECRET` also invalidates all printed QR payloads — treat it
 like a wipe of physical stickers.
 

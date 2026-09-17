@@ -8,7 +8,7 @@ const adapter = new PrismaBetterSqlite3({
 });
 const prisma = new PrismaClient({ adapter });
 
-const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
+const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 8);
 
 async function main() {
   const existing = await prisma.suspect.count();

@@ -48,21 +48,21 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Every story starts where I stand — the first line you cross",
-      "the last line you'll scan. Find me before the tale begins.",
+      "Seek the painted booth under the cafeteria colonnade, where a mirror and pots of greasepaint wait beside the pillars.",
+      "Follow the smell of the dining hall to the colonnade booth — paint, glass, and a face that is not a face.",
     ],
     decoyHints: {
       "The Boiler Shed": [
-        "Walk west from the carousel's silence, where the coal goes cold and no one laughs at all.",
-        "Turn from the lights toward the utility block, where ash remembers a fire that isn't yours.",
+        "Walk west from the carousel's silence to the utility block, where the coal goes cold and no one laughs at all.",
+        "Turn from the lights toward the boiler shed, where ash remembers a fire that isn't yours.",
       ],
       "The Prop Wagon": [
         "Seek the wagon that stores what the stage forgets — canvas, rope, and nothing living.",
-        "Behind the cafeteria, find the wagon whose door never sold a ticket and never will.",
+        "Behind the cafeteria, find the prop wagon whose door never sold a ticket and never will.",
       ],
       "The Rain Barrel Court": [
         "Where barrels catch the night's weather and the ground stays slick, wait for a sign that will not come.",
-        "Follow the drip line to the barrel court — a dead end dressed as a clue.",
+        "Follow the drip line to the rain barrel court — a dead end dressed as a clue.",
       ],
     },
     mirrorStyles: ["directional", "negation"],
@@ -106,8 +106,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Climb till your legs remember the count. On the first landing",
-      "thirst finds its answer — cold, clear, and waiting.",
+      "Climb to the admin block portico and find the hand-lettered ticket wagon, where coin and count keep the gate honest.",
+      "Seek the small booth at the portico steps — tickets in, never out, and a stool that remembers every laugh.",
     ],
     decoyHints: {
       "The Boiler Shed": [
@@ -133,7 +133,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: [],
     emitsFact: {
       key: "quill_gate_chained",
-      text: "The west gate stayed chained from dusk; Quill never opened it.",
+      text: "The west gate stayed chained from dusk; Quill never opened it. Cipher stamp: CHAIN.",
       cipherKey: "CHAIN",
     },
     keySource: null,
@@ -168,8 +168,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Where spoons clatter and steam tells no lies", 
-      "follow your nose past the smell of fries and spice.",
+      "Seek the amphitheatre's ring of stones, where unlit torches wait and fire is swallowed whole.",
+      "Follow the slope to the fire pit in the amphitheatre — heat without a ticket, and hands wrapped against the burn.",
     ],
     decoyHints: {
       "The Boiler Shed": [
@@ -177,8 +177,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
         "Among ash and grate, wait for a count that will not arrive.",
       ],
       "The Prop Wagon": [
-        "cages the of shadows the among wait, forward step never who beasts the of pit the Seek",
-        "Seek the wagon of unused props — a pit of tools, not beasts.",
+        "Seek the wagon of unused props — a pit of tools, not beasts, and no fire-eater among them.",
+        "Behind the colonnade, find the locked prop wagon and learn the count was a lie.",
       ],
       "The Rain Barrel Court": [
         "Among the barrels' shadows wait, where water gathers and no fire-eater comes.",
@@ -196,13 +196,13 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: [],
     emitsFact: {
       key: "bahri_pit_bandage",
-      text: "Bahri's hands were bandaged from burns; he worked the fire pit from the rain through the generator's death.",
+      text: "Bahri's hands were bandaged from burns; he worked the fire pit from the rain through the generator's death. Cipher stamp: BANDAGE.",
       cipherKey: "BANDAGE",
     },
     keySource: { type: "volunteer_word" },
     volunteerWord: "CINDER",
     // Frame holds shared prose; Mark IV anchors live entirely in the clause.
-    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
+    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. Every cinder that kissed my palms is still there under the cloth. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
     truthfulVariants: [
       {
         mark: "NONE",
@@ -228,13 +228,13 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Silence is the rule here, not the exception.",
-      " Rows of stacked secrets, guarded by a whisper.",
+      "Seek the chalk circle at the sports ground edge, where a barbell waits and strength moves slow.",
+      "Find the strongman's ring under open sky — chalk lines, a whistle on the wind, and ropes coiled for a lift.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
         "Go to the lowest ground behind the tents, where water gathers and nothing grows.",
-        "Follow the drainage to the ditch — black soup and no strongman.",
+        "Follow the drainage to the flooded ditch — black soup and no strongman.",
       ],
       "The Sawdust Heap": [
         "Where the ground is soft with yesterday's show and nothing stands upright, dig for a clue that isn't there.",
@@ -255,7 +255,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: ["bahri_pit_bandage"],
     emitsFact: {
       key: "duran_shed_shape",
-      text: "A bandaged figure was seen at the generator shed after the bell died; Bahri was not that figure.",
+      text: "A bandaged figure was seen at the generator shed after the bell died; Bahri was not that figure. Cipher stamp: SHED.",
       cipherKey: "SHED",
     },
     keySource: { type: "earlier_node_fact", factKey: "bahri_pit_bandage" },
@@ -285,8 +285,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Open sky above, chalk lines below —",
-      " where whistles decide who's fast and who's slow.",
+      "Seek the twin poles on the central lawn, where ribbon ties the sky and two shadows share one breath.",
+      "Find the trapeze rig in the open grass — chalk on the hands, silk between the poles, and no soloists forgiven.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
@@ -298,7 +298,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
         "The sawdust heap keeps no trapeze — only the weight of a wrong turn.",
       ],
       "The Broken Calliope": [
-        "Where the calliope leans silent, north becomes a lie — wait there anyway.",
+        "Where the calliope leans silent, north becomes a lie — wait there anyway and lose the hour.",
         "Seek the broken calliope; the twins never rehearsed there.",
       ],
     },
@@ -337,8 +337,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Not the door everyone uses — the quieter way in",
-      "the one fewer feet remember.",
+      "Not the door everyone uses — seek the quieter backstage of the old auditorium, where a curtained booth hides strings and wood.",
+      "Find the puppet stage behind the auditorium curtain, where fewer feet remember the way in and dead wood learns to speak.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
@@ -346,7 +346,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
         "South to the flooded ditch — a stage with no curtain.",
       ],
       "The Sawdust Heap": [
-        "Where no strings move and no one answers, look for the stage that speaks for itself.",
+        "Where no strings move and no one answers, look for the stage that speaks for itself and find only dust.",
         "The sawdust heap is a stage for mistakes, not puppets.",
       ],
       "The Broken Calliope": [
@@ -366,7 +366,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     truthPolicy: "fixed-true",
     emitsFact: {
       key: "ostrin_stage_lamp",
-      text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the big top before the rain.",
+      text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the big top before the rain. Cipher stamp: LAMP.",
       cipherKey: "LAMP",
     },
     keySource: { type: "volunteer_word" },
@@ -377,12 +377,12 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "NONE",
         accusationFactKeyword: "WEST_GATE",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. One string slipped and I tied it twice; the word string still tastes like resin on my tongue. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
       },
       {
         mark: "NONE",
         accusationFactKeyword: "GENERATOR",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness, testing the joints, rehearsing the one line he insisted I include — three labours, nothing more. When the lights died and the yard went to lamplight I was still there with the wood. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. A puppeteer's hands were full that night.`,
+        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness, testing the joints, rehearsing the one line he insisted I include — three labours, nothing more. Every string on that frame was mine to keep taut. When the lights died and the yard went to lamplight I was still there with the wood. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. A puppeteer's hands were full that night.`,
       },
       {
         mark: "NONE",
@@ -390,20 +390,15 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
         clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing, testing, rehearsing — three labours. The carousel bell rang its last honest hour and I remember thinking the strings had gone quiet too. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. Wood does not confess to murder no matter how long you hold it.`,
       },
     ],
-    lyingVariants: [
-      {
-        mark: "NONE",
-        accusationFactKeyword: "WEST_GATE",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
-      },
-    ],
+    // Unused under truthPolicy fixed-true; kept empty so seeded lies cannot fire.
+    lyingVariants: [],
     nextHints: [
-      "Gears, grease, and the smell of metal being taught new shapes.",
-      "Where things are built before they're believed.",
+      "Seek the chained west gate and the lantern hung upon it — the watchman's post keeps score when Quill sleeps.",
+      "Follow the road to the west gate's chain; under the last lamp, a watcher knows who walked toward the big top.",
     ],
     decoyHints: {
       "The Crow's Nest": [
-        "gate chained the beyond passes cart no where — nest the of shadow the in climb, high",
+        "Climb into the crow's nest beyond the chained gate, where no cart passes and only wasted time has a view.",
         "Climb the slick lookout — a nest with a view of wasted time.",
       ],
       "The Costume Trunk": [
@@ -445,12 +440,12 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Where forces are measured and light bends on command —",
-      " the room that explains why things fall.",
+      "Carry your Case Notes to the room where forces are measured and light bends on command — name the killer where things fall.",
+      "Seek the hall that explains why things fall; the last name is spoken where weight and light are taught to obey.",
     ],
     decoyHints: {
       "The Crow's Nest": [
-        "Under the dimmest lamp in the fullest tent, the last name is shouted by everyone. Step onto the lowest ground and say nothing.",
+        "Under the dimmest lamp in the fullest tent, the last name is shouted by everyone — climb the crow's nest instead and say nothing.",
         "Climb the crow's nest and shout into rain — no accusation hears you there.",
       ],
       "The Costume Trunk": [

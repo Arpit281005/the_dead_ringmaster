@@ -83,14 +83,14 @@ export function inverseMirrorStyle(text: string, style: MirrorStyle): string {
   }
 }
 
-/** Encode: plaintext → keyed obfuscate → mirror → stage1 */
-export function encodeStage1(plaintext: string, key: string, style: MirrorStyle): string {
-  return applyMirrorStyle(keyedObfuscate(plaintext, key), style);
+/** Encode Act II+ stage1: plaintext → Caesar only (easy hand decode). Style unused. */
+export function encodeStage1(plaintext: string, key: string, _style: MirrorStyle): string {
+  return keyedObfuscate(plaintext, key);
 }
 
-/** Decode: stage1 → inverse mirror → keyed deobfuscate → plaintext */
-export function decodeStage1(stage1: string, key: string, style: MirrorStyle): string {
-  return keyedDeobfuscate(inverseMirrorStyle(stage1, style), key);
+/** Decode Act II+ stage1: Caesar reverse. */
+export function decodeStage1(stage1: string, key: string, _style: MirrorStyle): string {
+  return keyedDeobfuscate(stage1, key);
 }
 
 export function normalizeCipherKey(raw: string): string {

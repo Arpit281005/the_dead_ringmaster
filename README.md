@@ -101,7 +101,9 @@ docker run -d --name carnival -p 3000:3000 \
 
 On start the container runs migrations, then **seeds only if the database is
 empty** (redeploys will not wipe teams). To force a wipe + new QR tokens set
-`FORCE_SEED=1` once, then remove it. Manual seed from a checkout:
+`FORCE_SEED=1` once, then remove it. **Required** after shipping shorter QR
+payloads (8-char token + 16-char MAC) — old stickers will not verify until you
+re-seed and re-print. Manual seed from a checkout:
 
 ```bash
 DATABASE_URL="file:/path/to/carnival.db" npm run db:seed
@@ -137,16 +139,19 @@ intentional, not a bug.
 ## Game logic notes
 
 - **Per-team variation**: `resolveNodeContent(sequenceIndex, teamSeed)` picks
-  `isTruthful`, Mark-bearing detail, riddle text, and a decoy from that node's
-  act pool. Content is returned only after a valid scan (testimony page) or
-  inside verdict/decoy Server Actions — never on Midway props for locked tents.
+  `isTruthful` from a dedicated RNG salt (`"truth"`), and Mark-bearing detail,
+  riddle text, and a decoy from the `"default"` stream (per act pool). Isolating
+  truth may flip seeded truth/lie vs older builds — avoid mid-hunt deploys
+  without re-registering teams. Content is returned only after a valid scan
+  (testimony page) or inside verdict/decoy Server Actions — never on Midway
+  props for locked tents.
 - **Riddle mechanic**: the app shows the plain riddle if the team says TRUTH,
   the mirrored riddle if they say LIE. The *correct* choice always points to
   the next story tent; the incorrect choice points to that team's seeded decoy.
-  **Act I** reveals the final reading immediately. **Act II+** shows a two-step
-  cipher (keyed Caesar, then mirror style); teams must enter a volunteer word
-  or Case Note cipher stamp via Unlock before the location text is readable.
-  Volunteer/admin cheat sheet: `/dev/riddle-keys` (dev only).
+  **Act I** reveals the final reading immediately (wrong-path may apply a
+  mirror style). **Act II+** shows Caesar-only ciphertext until Unlock with a
+  volunteer/testimony word or Case Note cipher stamp. Volunteer/admin cheat
+  sheet: `/dev/riddle-keys` (dev only).
 - **Wrong verdicts don't lock a team out.** They cost a scan at the seeded
   decoy tent (+5 min penalty) and a themed "misled" passage, after which the
   team can submit a fresh verdict for the same testimony. After **two** wrong
@@ -159,7 +164,11 @@ intentional, not a bug.
   tie-breakers. The clock locks on submit; the reveal shows which of the three
   structured parts matched (this team's submission only).
 - **Sequence / scan hardening**: QR payloads are HMAC-signed as
-  `nodeSlot.token.mac` (stable print slot). Authorization is always
+  `nodeSlot.token.mac` (stable print slot). The MAC is truncated to **16**
+  base64url characters; seed tokens are **8** chars. Changing either length
+  invalidates printed stickers — after deploy, `FORCE_SEED=1` once (or use a
+  fresh DB) and **re-print all QRs** from `/admin/print`. Do not ship this mid-
+  hunt on live teams without re-registering. Authorization is always
   `(team, nodeSlot)` — stickers are multi-team reusable, never globally spent.
   Scans: one client submit per code (retry to unlock) + 8s min interval per
   node; verdicts: 8/min/team. Story and
@@ -197,21 +206,21 @@ intentional, not a bug.
 
 **Act II** (tents 4–6 / 3–5) — subtle + cross-reference
 
-- Bahri: Mark IV (Reckoning) on lies; volunteer cipher word `CINDER`; emits
-  `bahri_pit_bandage` + `BANDAGE`.
+- Bahri: Mark IV (Reckoning) on lies; volunteer/testimony cipher word `CINDER`; emits
+  `bahri_pit_bandage` + stamp `BANDAGE`.
 - Duran: requires Bahri Case Note; cipher key `BANDAGE`; emits
-  `duran_shed_shape` + `SHED`.
+  `duran_shed_shape` + stamp `SHED`.
 - Twins: require Quill Case Note; cipher key `CHAIN`.
-- Stage1 cipher after verdict until Unlock; Midway advances only after a
-  correct unlock.
+- Stage1 after verdict is **Caesar only** (no mirror on ciphertext) until Unlock;
+  Midway advances only after a correct unlock.
 - Intent: cross-reference + on-site key; Mark IV is taught in the Case File,
   but which tent uses it is not spoiled.
 
 **Act III** (tents 7–8 / 6–7) — red herring + synthesis
 
 - Ostrin: `truthPolicy: "fixed-true"` (always truthful — red herring as the
-  murderer who never breaks a Mark); volunteer word `STRING`; emits
-  `ostrin_stage_lamp` + `LAMP`.
+  murderer who never breaks a Mark); testimony/volunteer word `STRING`; emits
+  `ostrin_stage_lamp` + stamp `LAMP`.
 - Watchman: requires `duran_shed_shape` + `ostrin_stage_lamp`; cipher key
   `LAMP`; can break Mark IV on lies.
 - Then Accusation (separate from riddle decode).

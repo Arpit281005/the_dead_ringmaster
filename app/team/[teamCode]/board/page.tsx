@@ -65,7 +65,7 @@ export default async function BoardPage({
                     {f.text}
                     {f.cipherKey && (
                       <span className="ink-stamp font-chrome text-[10px] uppercase ml-2 px-1.5 py-0.5 rounded-sm inline-block align-middle">
-                        Cipher: {f.cipherKey}
+                        Cipher stamp: {f.cipherKey}
                       </span>
                     )}
                   </span>

@@ -27,7 +27,6 @@ const storyNodePublicSelect = {
   sequenceIndex: true,
   suspectId: true,
   locationName: true,
-  locationDescription: true,
   act: true,
   suspect: { select: { id: true, name: true } },
 } as const;

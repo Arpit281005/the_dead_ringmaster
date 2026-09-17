@@ -110,8 +110,7 @@ export default async function MidwayPage({
                       <p className="font-chrome text-[11px] uppercase tracking-wide text-oxblood mb-1">
                         Act {node.act} · Tent {i + 1} · Current
                       </p>
-                      <p className="font-display font-bold text-lg mb-1">{node.locationName}</p>
-                      <p className="text-xs text-ink/60 mb-3">{node.locationDescription}</p>
+                      <p className="font-display font-bold text-lg mb-3">{node.locationName}</p>
                       {phase === "decoy-pending" ? (
                         <>
                           <p className="text-sm text-oxblood mb-3">
