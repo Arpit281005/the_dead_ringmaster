@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import {
   acknowledgeSecurityFlag,
   forceAdvanceTeam,
+  repairTeamFacts,
   voidTeamPenalty,
   grantOrganiserHint,
   clearOrganiserHint,
@@ -101,6 +102,25 @@ export function TeamMutationPanel({
           }
         >
           Force advance
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          className="btn-gold-outline font-chrome uppercase text-xs px-3 py-2 rounded-sm"
+          onClick={() =>
+            start(async () => {
+              const r = await repairTeamFacts(teamCode);
+              setMsg(
+                r.ok
+                  ? r.granted.length
+                    ? `Case Notes repaired (${r.granted.join(", ")}).`
+                    : "No missing Case Notes to grant."
+                  : r.error
+              );
+            })
+          }
+        >
+          Repair Case Notes
         </button>
         <button
           type="button"
