@@ -48,8 +48,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Walk east from the carousel's silence, where sawdust turns to greasepaint and the mirror never lies. Find the man who laughs in two colours and never in his own voice.",
-      "From the silent carousel, follow the paint-smell to the colonnade. Seek the booth where a face is built bowl by bowl.",
+      "Every story starts where I stand — the first line you cross",
+      "the last line you'll scan. Find me before the tale begins.",
     ],
     decoyHints: {
       "The Boiler Shed": [
@@ -106,8 +106,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Where the bell fell silent and the rain would not stop, find the man who counted every soul through the gate.",
-      "Seek the wagon that never sold a ticket for free — the Ticket Master still keeps the count.",
+      "Climb till your legs remember the count. On the first landing",
+      "thirst finds its answer — cold, clear, and waiting.",
     ],
     decoyHints: {
       "The Boiler Shed": [
@@ -168,8 +168,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Where the smoke tastes of tar and a man swallows flame for coin, find the one whose hands are freshly bandaged.",
-      "Seek the fire pit's ring of stones — the eater of flame keeps his burns honest.",
+      "Where spoons clatter and steam tells no lies", 
+      "follow your nose past the smell of fries and spice.",
     ],
     decoyHints: {
       "The Boiler Shed": [
@@ -228,8 +228,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Go to the highest ground behind the tents, where the earth is packed hard by years of falling weight.",
-      "Seek the chalk circle and the barbell — the strongman moves certain, never quick.",
+      "Silence is the rule here, not the exception.",
+      " Rows of stacked secrets, guarded by a whisper.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
@@ -285,8 +285,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "North of the ring, where silk is bound to poles and two shadows move as one, seek the pair who share a single breath.",
-      "Seek the trapeze poles on the central lawn — two who answer as one.",
+      "Open sky above, chalk lines below —",
+      " where whistles decide who's fast and who's slow.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
@@ -337,8 +337,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Where strings move without hands and someone always answers for himself, find the man who never speaks his own lines.",
-      "Seek the curtained puppet stage — wood that speaks when fingers pull.",
+      "Not the door everyone uses — the quieter way in",
+      "the one fewer feet remember.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
@@ -398,8 +398,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Beyond the chained gate where no cart may pass, a lone lamp still burns for the one who counted you in twice.",
-      "Seek the west gate's lantern — the watchman's post still keeps the chain.",
+      "Gears, grease, and the smell of metal being taught new shapes.",
+      "Where things are built before they're believed.",
     ],
     decoyHints: {
       "The Crow's Nest": [
@@ -445,8 +445,8 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Under the brightest lamp in the emptiest tent, the last name goes unspoken. Step onto the highest stage and say it.",
-      "Return to the Midway's end — the Accusation waits where the last lamp burned.",
+      "Where forces are measured and light bends on command —",
+      " the room that explains why things fall.",
     ],
     decoyHints: {
       "The Crow's Nest": [
