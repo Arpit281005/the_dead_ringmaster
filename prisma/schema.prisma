@@ -145,7 +145,8 @@ model Verdict {
   node           Node     @relation(fields: [nodeId], references: [id])
   choice         String // TRUTH | LIE
   wasCorrect     Boolean
-  /** Act II+: true once unlockRiddle accepted the on-site cipher key. */
+  /** Act II+: true once unlockRiddle accepted the on-site cipher key.
+   * Act I: true once acknowledgeRiddle after the team has read the plaintext riddle. */
   riddleUnlocked Boolean  @default(false)
   submittedAt    DateTime @default(now())
 }

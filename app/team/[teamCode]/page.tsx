@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTeamState, getAllSuspectsPublic, TOTAL_STORY_NODES } from "@/lib/state";
+import {
+  getTeamState,
+  getAllSuspectsPublic,
+  getDecoyPendingRiddle,
+  TOTAL_STORY_NODES,
+} from "@/lib/state";
 import { getGameConfig } from "@/lib/admin-team-insight";
 import TeamHeader from "@/components/TeamHeader";
 import { prisma } from "@/lib/db";
@@ -17,6 +22,12 @@ export default async function MidwayPage({
   const { team, nodes, clearances, phase } = state;
   const suspects = await getAllSuspectsPublic();
   const config = await getGameConfig();
+  const decoyRiddle =
+    phase === "decoy-pending" ? await getDecoyPendingRiddle(teamCode) : null;
+  const awaitingRiddle =
+    phase === "testimony" &&
+    "awaitingRiddleUnlock" in state &&
+    Boolean(state.awaitingRiddleUnlock);
 
   const correctVerdicts = await prisma.verdict.findMany({
     where: { teamId: team.id, wasCorrect: true },
@@ -113,9 +124,15 @@ export default async function MidwayPage({
                       <p className="font-display font-bold text-lg mb-3">{node.locationName}</p>
                       {phase === "decoy-pending" ? (
                         <>
-                          <p className="text-sm text-oxblood mb-3">
-                            You were misled. Find the dead-end marker to continue.
+                          <p className="text-sm text-oxblood mb-2">
+                            You were misled. Follow this reading to the dead end, then scan what
+                            you find.
                           </p>
+                          {decoyRiddle && (
+                            <p className="font-display text-base leading-snug mb-3 text-ink">
+                              {decoyRiddle}
+                            </p>
+                          )}
                           <Link
                             href={`/team/${team.teamCode}/scan`}
                             className="btn-oxblood font-chrome uppercase text-xs px-4 py-3 rounded-sm inline-block"
@@ -128,7 +145,7 @@ export default async function MidwayPage({
                           href={`/team/${team.teamCode}/testimony`}
                           className="btn-oxblood font-chrome uppercase text-xs px-4 py-3 rounded-sm inline-block"
                         >
-                          Enter the Tent
+                          {awaitingRiddle ? "Continue — Read the Riddle" : "Enter the Tent"}
                         </Link>
                       ) : (
                         <Link

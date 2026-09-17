@@ -108,7 +108,10 @@ export async function getNodeTestimony(teamCode: string, nodeId: string) {
   };
 }
 
-/** Stage1 + metadata when a verdict is waiting on the Act II+ cipher unlock. */
+/**
+ * Pending post-verdict riddle (survives Server Action revalidation).
+ * Act I: plaintext already; Act II+: stage1 ciphertext until unlock.
+ */
 export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
   const team = await getTeamByCode(teamCode);
   if (!team) return null;
@@ -117,7 +120,7 @@ export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
     where: { id: nodeId },
     select: { id: true, sequenceIndex: true, isDecoy: true, suspect: { select: { name: true } } },
   });
-  if (!node || node.isDecoy || node.sequenceIndex < 3) return null;
+  if (!node || node.isDecoy) return null;
 
   const lastVerdict = await prisma.verdict.findFirst({
     where: { teamId: team.id, nodeId: node.id },
@@ -127,7 +130,6 @@ export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
 
   const decoys = await loadDecoyRefs();
   const resolved = resolveNodeContent(node.sequenceIndex, team.teamSeed, decoys);
-  if (!resolved.needsKey) return null;
 
   const stage1 =
     lastVerdict.choice === "TRUTH" ? resolved.riddlePlain : resolved.riddleMirrored;
@@ -140,11 +142,12 @@ export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
   return {
     wasCorrect: lastVerdict.wasCorrect,
     riddle: stage1,
-    needsKey: true as const,
+    needsKey: resolved.needsKey,
     keyPrompt: resolved.keyPrompt,
     clearedSuspectName,
     advanced: false,
     huntComplete: false,
+    escalatedPenalty: false,
   };
 }
 
@@ -227,7 +230,8 @@ export async function getTeamState(teamCode: string) {
     ? { wasCorrect: lastVerdictRow.wasCorrect, riddleUnlocked: lastVerdictRow.riddleUnlocked }
     : null;
 
-  if (lastVerdictRow && !lastVerdictRow.riddleUnlocked && currentNode.sequenceIndex >= 3) {
+  // Keep the team on testimony until they finish the riddle (Act I acknowledge or Act II+ unlock).
+  if (lastVerdictRow && !lastVerdictRow.riddleUnlocked) {
     return {
       phase: "testimony" as TeamPhase,
       team,
@@ -272,6 +276,43 @@ export async function getTeamState(teamCode: string) {
     lastVerdict,
     awaitingRiddleUnlock: false as const,
   } as const;
+}
+
+/**
+ * Plaintext decoy/next riddle for Midway when the team must still find the dead-end.
+ * Only after the riddle was acknowledged (or Act II+ unlocked).
+ */
+export async function getDecoyPendingRiddle(teamCode: string): Promise<string | null> {
+  const team = await getTeamByCode(teamCode);
+  if (!team) return null;
+
+  const currentNode = await prisma.node.findFirst({
+    where: { sequenceIndex: team.currentIndex, isDecoy: false },
+    select: { id: true, sequenceIndex: true },
+  });
+  if (!currentNode) return null;
+
+  const lastVerdict = await prisma.verdict.findFirst({
+    where: { teamId: team.id, nodeId: currentNode.id },
+    orderBy: { submittedAt: "desc" },
+  });
+  if (!lastVerdict || lastVerdict.wasCorrect || !lastVerdict.riddleUnlocked) return null;
+
+  const decoyScan = await prisma.scan.findFirst({
+    where: {
+      teamId: team.id,
+      wasValid: true,
+      scannedAt: { gt: lastVerdict.submittedAt },
+      node: { isDecoy: true },
+    },
+  });
+  if (decoyScan) return null;
+
+  const decoys = await loadDecoyRefs();
+  const resolved = resolveNodeContent(currentNode.sequenceIndex, team.teamSeed, decoys);
+  return lastVerdict.choice === "TRUTH"
+    ? resolved.riddlePlaintextPlain
+    : resolved.riddlePlaintextMirrored;
 }
 
 export function elapsedSeconds(team: { startedAt: Date; finishedAt: Date | null }) {

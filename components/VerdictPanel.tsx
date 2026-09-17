@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { submitVerdict, unlockRiddle } from "@/lib/actions";
+import { submitVerdict, unlockRiddle, acknowledgeRiddle } from "@/lib/actions";
 import MarksReference from "@/components/MarksReference";
 
 type Choice = "TRUTH" | "LIE";
@@ -40,10 +40,15 @@ export default function VerdictPanel({
   const [pendingChoice, setPendingChoice] = useState<Choice | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<Result | null>(initialResult);
-  const [unlocked, setUnlocked] = useState(false);
-  const [finalRiddle, setFinalRiddle] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState(() =>
+    Boolean(initialResult && !initialResult.needsKey)
+  );
+  const [finalRiddle, setFinalRiddle] = useState<string | null>(() =>
+    initialResult && !initialResult.needsKey ? initialResult.riddle : null
+  );
   const [cipherInput, setCipherInput] = useState("");
   const [unlocking, setUnlocking] = useState(false);
+  const [continuing, setContinuing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function confirm() {
@@ -89,13 +94,40 @@ export default function VerdictPanel({
     );
   }
 
+  /** Persist riddle-read + Act I advance before leaving (survives Server Action refresh). */
+  async function continueAfterRiddle(href: string) {
+    setContinuing(true);
+    setError(null);
+    const res = await acknowledgeRiddle(teamCode, nodeId);
+    setContinuing(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            advanced: res.data.advanced || prev.advanced,
+            huntComplete: res.data.huntComplete || prev.huntComplete,
+          }
+        : prev
+    );
+    router.push(href);
+  }
+
   if (result) {
     const showKeyGate = result.needsKey && !unlocked;
     const displayRiddle = finalRiddle ?? result.riddle;
+    // After Act II unlock, advanced may already be true; Act I uses wasCorrect until acknowledge.
+    const showMidway =
+      unlocked && result.wasCorrect && !result.huntComplete;
+    const showAccuse = unlocked && result.wasCorrect && result.huntComplete;
+    const showScanner = unlocked && !result.wasCorrect;
 
     return (
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={initialResult ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className="paper-card rounded-sm p-6 flex flex-col gap-5"
       >
@@ -169,14 +201,14 @@ export default function VerdictPanel({
           </p>
         )}
 
-        {unlocked && !result.advanced && !result.wasCorrect && !result.escalatedPenalty && (
+        {unlocked && !result.wasCorrect && !result.escalatedPenalty && (
           <p className="text-sm text-oxblood leading-relaxed">
             Something doesn&apos;t sit right. Follow the riddle — if it leads to a dead end, scan
             what you find there, then return and weigh the testimony again.
           </p>
         )}
 
-        {unlocked && !result.advanced && !result.wasCorrect && result.escalatedPenalty && (
+        {unlocked && !result.wasCorrect && result.escalatedPenalty && (
           <p className="text-sm text-oxblood leading-relaxed">
             Follow the riddle to the dead end, scan what you find, then weigh the testimony again.
           </p>
@@ -184,28 +216,34 @@ export default function VerdictPanel({
 
         {unlocked && (
           <div className="flex flex-col gap-2">
-            {result.advanced && !result.huntComplete && (
+            {showMidway && (
               <button
-                onClick={() => router.push(`/team/${teamCode}`)}
+                type="button"
+                disabled={continuing}
+                onClick={() => continueAfterRiddle(`/team/${teamCode}`)}
                 className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
               >
-                Return to the Midway
+                {continuing ? "…" : "Return to the Midway"}
               </button>
             )}
-            {result.advanced && result.huntComplete && (
+            {showAccuse && (
               <button
-                onClick={() => router.push(`/team/${teamCode}/accuse`)}
+                type="button"
+                disabled={continuing}
+                onClick={() => continueAfterRiddle(`/team/${teamCode}/accuse`)}
                 className="btn-oxblood font-chrome uppercase text-sm py-3 rounded-sm"
               >
-                Proceed to the Accusation
+                {continuing ? "…" : "Proceed to the Accusation"}
               </button>
             )}
-            {!result.advanced && (
+            {showScanner && (
               <button
-                onClick={() => router.push(`/team/${teamCode}/scan`)}
+                type="button"
+                disabled={continuing}
+                onClick={() => continueAfterRiddle(`/team/${teamCode}/scan`)}
                 className="btn-gold-outline font-chrome uppercase text-sm py-3 rounded-sm"
               >
-                Go to Scanner
+                {continuing ? "…" : "Go to Scanner"}
               </button>
             )}
           </div>

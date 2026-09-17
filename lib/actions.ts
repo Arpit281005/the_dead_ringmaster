@@ -325,11 +325,11 @@ export async function submitVerdict(
     orderBy: { submittedAt: "desc" },
   });
   if (lastVerdict?.wasCorrect) {
-    return { ok: false, error: "Unlock the cipher before you leave this tent." };
+    return { ok: false, error: "Follow the riddle before you leave this tent." };
   }
   if (lastVerdict && !lastVerdict.wasCorrect) {
-    if (!lastVerdict.riddleUnlocked && node.sequenceIndex >= 3) {
-      return { ok: false, error: "Unlock the cipher before you leave this tent." };
+    if (!lastVerdict.riddleUnlocked) {
+      return { ok: false, error: "Follow the riddle before you leave this tent." };
     }
     const decoyScan = await prisma.scan.findFirst({
       where: {
@@ -374,8 +374,6 @@ export async function submitVerdict(
   });
 
   let clearedSuspectName: string | null = null;
-  let advanced = false;
-  let huntComplete = false;
   let escalatedPenalty = false;
 
   if (wasCorrect) {
@@ -415,13 +413,8 @@ export async function submitVerdict(
       clearedSuspectName = node.suspect?.name ?? null;
     }
 
-    if (!resolved.needsKey) {
-      const nextIndex = node.sequenceIndex + 1;
-      await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
-      advanced = true;
-      huntComplete = nextIndex >= TOTAL_STORY_NODES;
-      await maybeFlagFastResolve(team.id, node.id, node.minExpectedSeconds);
-    }
+    // Act I (no cipher): do not advance yet — keep the team on the riddle until
+    // acknowledgeRiddle. Act II+ advances from unlockRiddle after the key.
   } else if (priorWrongs >= 2) {
     // 3rd+ wrong at this node: escalated time cost (token spend when Tokens ship).
     await prisma.team.update({
@@ -437,8 +430,8 @@ export async function submitVerdict(
       wasCorrect,
       riddle,
       clearedSuspectName,
-      advanced,
-      huntComplete,
+      advanced: false,
+      huntComplete: false,
       needsKey: resolved.needsKey,
       keyPrompt: resolved.keyPrompt,
       escalatedPenalty,
@@ -527,6 +520,64 @@ export async function unlockRiddle(
     ok: true,
     data: { riddle: plaintext, advanced, huntComplete, clearedSuspectName },
   };
+}
+
+/**
+ * Act I: mark the post-verdict riddle as read, then advance on a correct judgment.
+ * Act II+ wrong path: after unlock, this is a no-op if already unlocked.
+ * Safe to call before navigating away from the riddle panel.
+ */
+export async function acknowledgeRiddle(
+  teamCode: string,
+  nodeId: string
+): Promise<ActionResult<{ advanced: boolean; huntComplete: boolean }>> {
+  const paused = await assertGameNotPaused();
+  if (paused) return { ok: false, error: paused };
+
+  const team = await requireTeamByCode(teamCode);
+  if (!team) return { ok: false, error: "Team not found." };
+
+  const node = await prisma.node.findUnique({ where: { id: nodeId } });
+  if (!node || node.isDecoy) return { ok: false, error: "Riddle not found." };
+  if (node.sequenceIndex !== team.currentIndex) {
+    // Already advanced (e.g. Act II unlock) — treat as done.
+    return { ok: true, data: { advanced: true, huntComplete: team.currentIndex >= TOTAL_STORY_NODES } };
+  }
+
+  const lastVerdict = await prisma.verdict.findFirst({
+    where: { teamId: team.id, nodeId: node.id },
+    orderBy: { submittedAt: "desc" },
+  });
+  if (!lastVerdict) {
+    return { ok: false, error: "Render a verdict before leaving this tent." };
+  }
+
+  const resolved = await resolveForTeam(team.teamSeed, node.sequenceIndex);
+
+  // Act II+ still needs the cipher unlock before acknowledge can advance.
+  if (resolved.needsKey && !lastVerdict.riddleUnlocked) {
+    return { ok: false, error: "Unlock the cipher before you leave this tent." };
+  }
+
+  if (!lastVerdict.riddleUnlocked) {
+    await prisma.verdict.update({
+      where: { id: lastVerdict.id },
+      data: { riddleUnlocked: true },
+    });
+  }
+
+  let advanced = false;
+  let huntComplete = false;
+
+  if (lastVerdict.wasCorrect && team.currentIndex === node.sequenceIndex) {
+    const nextIndex = node.sequenceIndex + 1;
+    await prisma.team.update({ where: { id: team.id }, data: { currentIndex: nextIndex } });
+    advanced = true;
+    huntComplete = nextIndex >= TOTAL_STORY_NODES;
+    await maybeFlagFastResolve(team.id, node.id, node.minExpectedSeconds);
+  }
+
+  return { ok: true, data: { advanced, huntComplete } };
 }
 
 export async function updateTeamNote(
