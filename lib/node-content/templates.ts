@@ -379,16 +379,14 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     ],
     decoyHints: {
       "The Crow's Nest": [
-        "Climb into the crow's nest beyond the chained gate, where no cart passes and only wasted time has a view.",
-        "Climb the slick lookout — a nest with a view of wasted time.",
+        "I hum where no one lingers, tucked behind the building everyone walks past but never enters. Follow the sound, not the crowd.",
       ],
       "The Costume Trunk": [
-        "Beyond the wrong curtain, open the trunk that dresses ghosts and find no gate.",
-        "Seek the costume trunk backstage of nowhere — silk without a body.",
+        "Rows of metal that arrived full of people and now stand empty, waiting for the day to end.",
       ],
       "The Silent Carousel": [
-        "Where the carousel should turn and does not, wait under animals that never move.",
-        "Return to the silent carousel — you have already left its truth behind.",
+        "Not far from minds that chase the grade,I sit in shade where worries fade.",
+        "No desk, no chalk, no clock to bind — Just rustling leaves to soothe your mind.",
       ],
     },
     mirrorStyles: ["reversed", "directional"],
