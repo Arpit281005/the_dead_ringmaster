@@ -57,8 +57,8 @@ export default async function AdminPrintPage() {
             <img src={n.qr} alt="" className="mx-auto w-36 h-36" />
             <p className="text-[11px] text-ink/60 mt-1">{n.locationDescription}</p>
             <p className="text-[10px] mt-2 italic">
-              Volunteer: stay with this tent; speak cipher word only if this tent uses a volunteer key
-              (see /dev/riddle-keys).
+              Volunteer: stay with this tent; speak the cipher word only if this
+              tent uses a volunteer key (organiser brief).
             </p>
             <code className="text-[9px] break-all block mt-1">{n.payload}</code>
           </div>

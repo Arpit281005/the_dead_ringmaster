@@ -11,6 +11,19 @@ const prisma = new PrismaClient({ adapter });
 const token = customAlphabet("abcdefghjkmnpqrstuvwxyz23456789", 10);
 
 async function main() {
+  const existing = await prisma.suspect.count();
+  const force = process.env.FORCE_SEED === "1";
+  if (existing > 0 && !force) {
+    console.log(
+      `Database already seeded (${existing} suspects). Skipping seed. Set FORCE_SEED=1 to wipe and re-seed (destroys teams + regenerates QR tokens).`
+    );
+    return;
+  }
+
+  if (force && existing > 0) {
+    console.log("FORCE_SEED=1 — wiping and re-seeding…");
+  }
+
   console.log("Clearing existing data...");
   await prisma.adminAction.deleteMany();
   await prisma.securityFlag.deleteMany();

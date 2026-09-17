@@ -72,6 +72,10 @@ This app is meant for **one long-lived Node process** with a **persistent SQLite
 file**. It is not a fit for Vercel/serverless (native `better-sqlite3`, durable
 disk, and in-memory rate limits).
 
+**Hosted on Railway:** follow the full checklist in
+[`RAILWAY.md`](./RAILWAY.md) (volume at `/data`, secrets, 1 replica, admin vs
+participants).
+
 **Required env (production):**
 
 | Variable | Notes |
@@ -95,14 +99,16 @@ docker run -d --name carnival -p 3000:3000 \
   carnival-of-lies
 ```
 
-Migrations run on container start (`prisma migrate deploy`). **Seed once** after
-first boot from a local checkout that can see the same DB file (seed **wipes**
-existing teams — do not re-run on every deploy):
+On start the container runs migrations, then **seeds only if the database is
+empty** (redeploys will not wipe teams). To force a wipe + new QR tokens set
+`FORCE_SEED=1` once, then remove it. Manual seed from a checkout:
 
 ```bash
 DATABASE_URL="file:/path/to/carnival.db" npm run db:seed
 ```
 
+Participants never see `/dev/*` (404) or admin links. Organisers use `/admin`
+with `ADMIN_PASSWORD` only.
 Back up the `/data` volume before upgrades. Keep **one replica** only.
 
 ## Testing the hunt without printed QR codes
