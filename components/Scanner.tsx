@@ -68,6 +68,15 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
     let cancelled = false;
 
     async function start() {
+      if (!window.isSecureContext) {
+        if (!cancelled) {
+          setCameraError(
+            "Camera needs HTTPS on phones. Run npm run dev:lan and open the https://… link (not http). Paste or type the tent code below in the meantime."
+          );
+        }
+        return;
+      }
+
       try {
         const { Html5Qrcode } = await import("html5-qrcode");
         if (cancelled || !scannerRef.current) return;

@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# local LAN HTTPS certs (npm run dev:lan)
+.certs/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

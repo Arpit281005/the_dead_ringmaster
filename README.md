@@ -34,6 +34,22 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+### Phone / LAN camera
+
+Mobile browsers block the camera on plain `http://` LAN IPs (not a secure
+context). For phone testing:
+
+```bash
+npm run dev:lan
+```
+
+Open the printed `https://<your-lan-ip>:3000` URL on the phone, accept the
+self-signed certificate warning once, then allow camera. Manual code entry
+still works on HTTP if you only need to paste payloads from `/dev/qr`.
+
+Production deployments need real TLS in front of the Node process (reverse
+proxy); the Docker image itself serves HTTP on the container port.
+
 ## Production (SQLite single-node)
 
 This app is meant for **one long-lived Node process** with a **persistent SQLite
