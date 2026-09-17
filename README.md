@@ -43,9 +43,25 @@ context). For phone testing:
 npm run dev:lan
 ```
 
-Open the printed `https://<your-lan-ip>:3000` URL on the phone, accept the
-self-signed certificate warning once, then allow camera. Manual code entry
-still works on HTTP if you only need to paste payloads from `/dev/qr`.
+Use the **two different** URLs the script prints:
+
+| Where | Open |
+|-------|------|
+| This Mac | `https://localhost:3000` |
+| Phone (same Wi‑Fi) | `https://<your-lan-ip>:3000` (e.g. `https://10.0.3.195:3000`) |
+
+**Do not** open `https://0.0.0.0:3000` — phones reject that address; it only means
+“listen on all interfaces.”
+
+If Brave/Chrome shows **Your connection is not private**
+(`ERR_CERT_AUTHORITY_INVALID`): tap **Advanced** → **Proceed to \<ip\> (unsafe)**
+once, then allow the camera. Manual code entry still works on HTTP if you only
+need to paste payloads from `/dev/qr`.
+
+Optional: install [mkcert](https://github.com/FiloSottile/mkcert) and run
+`mkcert -install` on the Mac so `dev:lan` can issue a locally trusted cert
+(no warning on desktop). Phones may still need **Proceed** unless you also
+install the mkcert root CA on the device.
 
 Production deployments need real TLS in front of the Node process (reverse
 proxy); the Docker image itself serves HTTP on the container port.

@@ -2,8 +2,11 @@
 /**
  * LAN HTTPS dev server — required for phone camera (getUserMedia needs a secure context).
  * Usage: npm run dev:lan
+ *
+ * Binds 0.0.0.0 so Local stays https://localhost:3000 and phones can reach the LAN IP.
+ * Rewrites Next's misleading Network https://0.0.0.0:PORT line to the real LAN URL.
  */
-import { spawn, execFileSync } from "node:child_process";
+import { spawn, execFileSync, execSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { networkInterfaces } from "node:os";
 import { join, dirname } from "node:path";
@@ -43,11 +46,49 @@ function detectLanIp() {
   return preferred[0] ?? fallback[0] ?? "127.0.0.1";
 }
 
+function hasMkcert() {
+  try {
+    execSync("mkcert -help", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function ensureCerts(lanIp) {
   mkdirSync(certDir, { recursive: true });
+  const provider = hasMkcert() ? "mkcert" : "openssl";
+  const metaWanted = `${lanIp}|${provider}`;
   const prior = existsSync(metaPath) ? readFileSync(metaPath, "utf8").trim() : "";
-  if (existsSync(keyPath) && existsSync(certPath) && prior === lanIp) {
+  if (existsSync(keyPath) && existsSync(certPath) && prior === metaWanted) {
     return;
+  }
+
+  if (provider === "mkcert") {
+    try {
+      execFileSync(
+        "mkcert",
+        [
+          "-cert-file",
+          certPath,
+          "-key-file",
+          keyPath,
+          "localhost",
+          "127.0.0.1",
+          "::1",
+          lanIp,
+        ],
+        { stdio: "pipe", cwd: root }
+      );
+      writeFileSync(metaPath, metaWanted);
+      console.log(`Generated mkcert TLS cert for localhost + ${lanIp} → .certs/`);
+      return;
+    } catch (err) {
+      console.warn(
+        "mkcert failed; falling back to openssl self-signed.\n",
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   const san = `DNS:localhost,IP:127.0.0.1,IP:${lanIp}`;
@@ -98,8 +139,14 @@ extendedKeyUsage = serverAuth
     );
     process.exit(1);
   }
-  writeFileSync(metaPath, lanIp);
-  console.log(`Generated LAN TLS cert for ${lanIp} → .certs/`);
+  writeFileSync(metaPath, `${lanIp}|openssl`);
+  console.log(`Generated openssl self-signed TLS cert for ${lanIp} → .certs/`);
+}
+
+function rewriteDevUrls(chunk, lanIp) {
+  return chunk
+    .toString()
+    .replace(/https?:\/\/0\.0\.0\.0:(\d+)/g, `https://${lanIp}:$1`);
 }
 
 const lanIp = detectLanIp();
@@ -107,8 +154,10 @@ ensureCerts(lanIp);
 
 console.log(`
 Phone / LAN camera testing
-  Open:  https://${lanIp}:3000
-  Accept the self-signed certificate warning once on the phone.
+  Local (this Mac):  https://localhost:3000
+  Phone / Network:   https://${lanIp}:3000
+  Never open https://0.0.0.0:3000 — phones reject that address.
+  Cert warning (Brave/Chrome): Advanced → Proceed to ${lanIp} (unsafe)
   Camera will not work on http://${lanIp}:3000 (insecure context).
 `);
 
@@ -127,13 +176,20 @@ const child = spawn(
   ],
   {
     cwd: root,
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "pipe"],
     env: {
       ...process.env,
       DEV_LAN_HOST: lanIp,
     },
   }
 );
+
+child.stdout?.on("data", (buf) => {
+  process.stdout.write(rewriteDevUrls(buf, lanIp));
+});
+child.stderr?.on("data", (buf) => {
+  process.stderr.write(rewriteDevUrls(buf, lanIp));
+});
 
 child.on("exit", (code, signal) => {
   if (signal) process.kill(process.pid, signal);
