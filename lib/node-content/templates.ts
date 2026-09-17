@@ -48,21 +48,16 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Seek the painted booth under the cafeteria colonnade, where a mirror and pots of greasepaint wait beside the pillars.",
-      "Follow the smell of the dining hall to the colonnade booth — paint, glass, and a face that is not a face.",
-    ],
+      "Every story starts where I stand — the first line you cross, the last line you'll scan. Find me before the tale begins.",],
     decoyHints: {
       "The Boiler Shed": [
-        "Walk west from the carousel's silence to the utility block, where the coal goes cold and no one laughs at all.",
-        "Turn from the lights toward the boiler shed, where ash remembers a fire that isn't yours.",
+        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
       ],
       "The Prop Wagon": [
-        "Seek the wagon that stores what the stage forgets — canvas, rope, and nothing living.",
-        "Behind the cafeteria, find the prop wagon whose door never sold a ticket and never will.",
+        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
       ],
       "The Rain Barrel Court": [
-        "Where barrels catch the night's weather and the ground stays slick, wait for a sign that will not come.",
-        "Follow the drip line to the rain barrel court — a dead end dressed as a clue.",
+        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
       ],
     },
     mirrorStyles: ["directional", "negation"],
@@ -106,21 +101,17 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Climb to the admin block portico and find the hand-lettered ticket wagon, where coin and count keep the gate honest.",
-      "Seek the small booth at the portico steps — tickets in, never out, and a stool that remembers every laugh.",
+      "Not the door everyone uses — the quieter way in, the one fewer feet remember.",
     ],
     decoyHints: {
       "The Boiler Shed": [
-        "Where no bell rings and no rain falls, seek the shed where coal went to ash.",
-        "Turn toward the cold utility block; the carnival's heat died there first.",
+        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
       ],
       "The Prop Wagon": [
-        "Where no bell rings and no rain falls, seek the wagon that never sold a single ticket.",
-        "Find the prop wagon behind the colonnade — empty of faces, full of rope.",
+        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
       ],
       "The Rain Barrel Court": [
-        "Where barrels drink the night and give nothing back, wait under the drip.",
-        "Follow the slick stones to the barrel court and learn you were misled.",
+        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
       ],
     },
     mirrorStyles: ["negation", "directional"],
@@ -168,21 +159,17 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Seek the amphitheatre's ring of stones, where unlit torches wait and fire is swallowed whole.",
-      "Follow the slope to the fire pit in the amphitheatre — heat without a ticket, and hands wrapped against the burn.",
+      "I announce what others whisper — curfews, warnings, names in bold. Read me where the residents sleep.",
     ],
     decoyHints: {
       "The Boiler Shed": [
-        "Seek the cold shed where no flame is swallowed and no ticket is sold.",
-        "Among ash and grate, wait for a count that will not arrive.",
+        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
       ],
       "The Prop Wagon": [
-        "Seek the wagon of unused props — a pit of tools, not beasts, and no fire-eater among them.",
-        "Behind the colonnade, find the locked prop wagon and learn the count was a lie.",
+        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
       ],
       "The Rain Barrel Court": [
-        "Among the barrels' shadows wait, where water gathers and no fire-eater comes.",
-        "Step to the barrel court and find only rain keeping score.",
+        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
       ],
     },
     mirrorStyles: ["reversed", "negation"],
@@ -228,21 +215,19 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Seek the chalk circle at the sports ground edge, where a barbell waits and strength moves slow.",
-      "Find the strongman's ring under open sky — chalk lines, a whistle on the wind, and ropes coiled for a lift.",
+      "Open sky above, chalk lines below — where whistles decide who's fast and who's slow.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "Go to the lowest ground behind the tents, where water gathers and nothing grows.",
-        "Follow the drainage to the flooded ditch — black soup and no strongman.",
+        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
+
       ],
       "The Sawdust Heap": [
-        "Where the ground is soft with yesterday's show and nothing stands upright, dig for a clue that isn't there.",
-        "Seek the sawdust heap behind the ring — a soft grave for bad verdicts.",
+        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
+        ,
       ],
       "The Broken Calliope": [
-        "Where music once lived and now only rain taps the keys, wait for a tune that will not play.",
-        "Find the silent calliope shell — wrong stage, right penalty.",
+        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
       ],
     },
     mirrorStyles: ["antonym", "directional"],
@@ -285,21 +270,20 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Seek the twin poles on the central lawn, where ribbon ties the sky and two shadows share one breath.",
-      "Find the trapeze rig in the open grass — chalk on the hands, silk between the poles, and no soloists forgiven.",
+      "Silence is the rule here, not the exception. Rows of stacked secrets, guarded by a whisper."
+      ,
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "South of the ring, where the ditch drinks the rain and gives nothing back, seek the pair who share a single breath.",
-        "Turn south to the flooded ditch — no silk, no twins.",
+        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
+
       ],
       "The Sawdust Heap": [
-        "South of the ring, where sawdust softens every step, look for two shadows that will not appear.",
-        "The sawdust heap keeps no trapeze — only the weight of a wrong turn.",
+        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
+        ,
       ],
       "The Broken Calliope": [
-        "Where the calliope leans silent, north becomes a lie — wait there anyway and lose the hour.",
-        "Seek the broken calliope; the twins never rehearsed there.",
+        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
       ],
     },
     mirrorStyles: ["directional", "antonym"],
@@ -337,21 +321,19 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Not the door everyone uses — seek the quieter backstage of the old auditorium, where a curtained booth hides strings and wood.",
-      "Find the puppet stage behind the auditorium curtain, where fewer feet remember the way in and dead wood learns to speak.",
+      "Red and silent, I wait for disaster that (hopefully) never comes. Find me mounted near danger, never far from an exit.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "Where no strings move and no one answers, look for the ditch that only answers with rain.",
-        "South to the flooded ditch — a stage with no curtain.",
+        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
+
       ],
       "The Sawdust Heap": [
-        "Where no strings move and no one answers, look for the stage that speaks for itself and find only dust.",
-        "The sawdust heap is a stage for mistakes, not puppets.",
+        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
+        ,
       ],
       "The Broken Calliope": [
-        "Where music failed and strings never lived, wait for a voice that will not answer.",
-        "Find the broken calliope — silence pretending to be a clue.",
+        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
       ],
     },
     mirrorStyles: ["negation", "reversed"],
@@ -393,8 +375,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     // Unused under truthPolicy fixed-true; kept empty so seeded lies cannot fire.
     lyingVariants: [],
     nextHints: [
-      "Seek the chained west gate and the lantern hung upon it — the watchman's post keeps score when Quill sleeps.",
-      "Follow the road to the west gate's chain; under the last lamp, a watcher knows who walked toward the big top.",
+      "Where forces are measured and light bends on command — the room that explains why things fall.",
     ],
     decoyHints: {
       "The Crow's Nest": [
@@ -440,21 +421,18 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       },
     ],
     nextHints: [
-      "Carry your Case Notes to the room where forces are measured and light bends on command — name the killer where things fall.",
-      "Seek the hall that explains why things fall; the last name is spoken where weight and light are taught to obey.",
+      "Where the fest gathers to watch, applaud, and finally learn the truth. All roads on this journey end where the stage lights are brightest.",
     ],
     decoyHints: {
       "The Crow's Nest": [
-        "Under the dimmest lamp in the fullest tent, the last name is shouted by everyone — climb the crow's nest instead and say nothing.",
-        "Climb the crow's nest and shout into rain — no accusation hears you there.",
+        "I hum where no one lingers, tucked behind the building everyone walks past but never enters. Follow the sound, not the crowd.",
       ],
       "The Costume Trunk": [
-        "Under a closed lid, names are only fabric. Open the costume trunk and find no verdict.",
-        "Seek the trunk of empty coats — the last name is not sewn there.",
+        "Rows of metal that arrived full of people and now stand empty, waiting for the day to end.",
       ],
       "The Silent Carousel": [
-        "Under circling animals that will not move, say nothing and lose the hour.",
-        "The silent carousel keeps turning in memory only — wrong stage for the last word.",
+        "Not far from minds that chase the grade,I sit in shade where worries fade.",
+        "No desk, no chalk, no clock to bind — Just rustling leaves to soothe your mind.",
       ],
     },
     mirrorStyles: ["antonym", "negation"],
