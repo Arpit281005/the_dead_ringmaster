@@ -172,6 +172,7 @@ like a wipe of physical stickers.
 |---------|--------------|-----|
 | App boots but data vanishes after deploy | No volume / wrong mount | Mount volume at `/data`; set `DATABASE_URL=file:/data/carnival.db` |
 | Crash: `QR_HMAC_SECRET must be set` | Missing/short secret | Set ≥16 char secret; redeploy |
+| Crash: `Cannot find module 'effect'` (or `fast-check` / Prisma config load) | Incomplete Docker `node_modules` (cherry-picked Prisma CLI) | Use current `Dockerfile` which overlays the full `deps` `node_modules`; redeploy a fresh build |
 | `/admin/login` says password not configured | Missing/short `ADMIN_PASSWORD` | Set ≥8 chars |
 | Empty hunt (no tents) | Seed never ran / migrate failed | Check deploy logs; ensure volume writable; restart once |
 | Rate limits weird / DB locks | More than one replica | Scale to **1** |
