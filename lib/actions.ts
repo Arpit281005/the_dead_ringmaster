@@ -22,7 +22,7 @@ import { customAlphabet } from "nanoid";
 const DECOY_PENALTY_SECONDS = 5 * 60;
 /** Extra time after 2 wrong verdicts at one node (tokens still greenfield). */
 const ESCALATED_VERDICT_PENALTY_SECONDS = 10 * 60;
-const SCAN_RATE_LIMIT = { limit: 6, windowMs: 60_000 };
+/** Min gap between scans of the same node (anti-spam). Client also submits only once per code. */
 const SCAN_NODE_MIN_INTERVAL_MS = 8_000;
 const VERDICT_RATE_LIMIT = { limit: 8, windowMs: 60_000 };
 const JOIN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
@@ -168,17 +168,6 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
 
   const ctx = await ensureClientContext();
   await touchTeamDevice(team.id, ctx);
-
-  const rate = checkRateLimit(`scan:${team.id}`, SCAN_RATE_LIMIT);
-  if (!rate.allowed) {
-    return {
-      ok: true,
-      data: {
-        valid: false,
-        reason: "Too many attempts — wait a moment before scanning again.",
-      },
-    };
-  }
 
   const verified = verifySignedQrPayload(rawToken);
   if (!verified) {

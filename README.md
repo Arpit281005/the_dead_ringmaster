@@ -123,7 +123,8 @@ intentional, not a bug.
 - **Sequence / scan hardening**: QR payloads are HMAC-signed as
   `nodeSlot.token.mac` (stable print slot). Authorization is always
   `(team, nodeSlot)` — stickers are multi-team reusable, never globally spent.
-  Scans: 6/min/team + 8s min interval per node; verdicts: 8/min/team. Story and
+  Scans: one client submit per code (retry to unlock) + 8s min interval per
+  node; verdicts: 8/min/team. Story and
   decoy re-scans are idempotent (no double advance / double penalty). Soft
   `SecurityFlag`s for unknown device/IP and fast resolves (`Node.minExpectedSeconds`);
   review at `/dev/security-flags` (dev only). Page DTOs use `TeamPublic` (no
@@ -139,7 +140,7 @@ intentional, not a bug.
 |--------|--------|
 | `nodeSlot` + QR sign by slot; scan eval `(team, slot)` | Req 1 — shared sticker ≠ spent token |
 | `TeamDevice` + soft `SecurityFlag` on unknown device/IP | Req 2 — photo-share signal |
-| Scan 6/min + 8s/node; verdict RL; +10m after 2 wrongs | Req 3 — brute force |
+| Scan once + 8s/node cooldown; verdict RL; +10m after 2 wrongs | Req 3 — brute force |
 | Public team DTO; `lib/solution.ts` split; prop audit | Req 4 — content intercept |
 | Explicit idempotent paths + `scripts/scan-idempotency-check.ts` | Req 5 — double scan |
 | `minExpectedSeconds` + `FAST_RESOLVE` flags | Req 6 — speed review |

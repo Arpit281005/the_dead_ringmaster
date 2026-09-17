@@ -17,7 +17,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "NONE",
         clause:
-          "Three things hold: the rain, the bell, and the watch that stopped at his wrist. I was in this tent when the rain began, mixing wax, counting candles, and waiting for a client who never came. The bell rang its last honest hour at eleven, and after that there was only lamplight, my own, guttering low.",
+          "Three things hold: the rain, the bell, and the watch that stopped at his wrist. I was in this tent when the rain began, mixing wax, counting candles, and waiting for a client who never came. The bell rang its last honest hour at eleven. I stayed with wax and cards; when the generator failed at twenty past, there was only my own lamplight, guttering low.",
       },
       {
         mark: "NONE",
@@ -75,7 +75,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: [],
     emitsFact: null,
     keySource: null,
-    testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The bell rang its hours, the rain fell, the gate stayed chained — I know because I checked it myself, twice, out of nothing but boredom. When the generator failed I lit a candle and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the big top. Ask anyone. Ask no one. It hardly matters which.`,
+    testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The bell rang its hours, the rain fell, the gate stayed chained — I know because I checked it myself, twice, out of nothing but boredom. When the generator failed I worked by lamplight and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the big top. Ask anyone. Ask no one. It hardly matters which.`,
     truthfulVariants: [
       {
         mark: "NONE",
@@ -264,7 +264,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "NONE",
         clause:
-          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores I do every night before a show. The rain came and I kept working under the awning. Close to half eleven, after the bell had already gone quiet, I did see a shape near the generator shed, hands wrapped white in the lamplight — didn't think much of it, half the troupe nurses some wound or other, and it was not the fire-eater's walk.",
+          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores I do every night before a show. The rain came and I kept working under the awning. Close to half past eleven, after the bell had already gone quiet, I did see a shape near the generator shed, hands wrapped white in the lamplight — didn't think much of it, half the troupe nurses some wound or other, and it was not the fire-eater's walk.",
       },
       {
         mark: "NONE",
@@ -276,7 +276,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "CASEFILE",
         clause:
-          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores. The rain came. Close to half eleven, after the bell had already gone quiet, I saw Bahri by the generator shed, hands wrapped white, clear as lamplight — the fire-eater, away from his pit.",
+          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores. The rain came. Close to half past eleven, after the bell had already gone quiet, I saw Bahri by the generator shed, hands wrapped white, clear as lamplight — the fire-eater, away from his pit.",
       },
       {
         mark: "THREE",
@@ -316,7 +316,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "NONE",
         clause:
-          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry from the afternoon. We heard the bell stop, heard the rain start, heard the generator die somewhere in the dark behind us — we did not leave the poles, did not walk the west gate, did not hear anything from the big top worth reporting.",
+          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry from the afternoon. We heard the rain start, heard the bell stop, heard the generator die somewhere in the dark behind us — we did not leave the poles, did not walk the west gate, did not hear anything from the big top worth reporting.",
       },
       {
         mark: "NONE",
@@ -328,7 +328,7 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
       {
         mark: "THREE",
         clause:
-          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because after the generator died we left the poles and walked the west gate, and found the chain hanging slack for a breath before we fled back. We heard the bell stop, heard the rain start, heard the generator die — and we heard the gate complain on its hinge, though Quill swears it never moved.",
+          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because after the generator died we left the poles and walked the west gate, and found the chain hanging slack for a breath before we fled back. We heard the rain start, heard the bell stop, heard the generator die — and we heard the gate complain on its hinge, though Quill swears it never moved.",
       },
       {
         mark: "CASEFILE",

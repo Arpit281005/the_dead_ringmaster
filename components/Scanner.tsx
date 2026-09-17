@@ -18,16 +18,20 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
   const [manualToken, setManualToken] = useState("");
   const [outcome, setOutcome] = useState<ScanOutcome | null>(null);
   const [busy, setBusy] = useState(false);
-  const submittingRef = useRef(false);
+  /** Blocks camera re-fire until the user clears / retries. */
+  const [locked, setLocked] = useState(false);
+  const lockedRef = useRef(false);
   const runningRef = useRef(false);
 
   async function handleToken(token: string) {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
+    const trimmed = token.trim();
+    if (!trimmed || lockedRef.current) return;
+    lockedRef.current = true;
+    setLocked(true);
     setBusy(true);
     setOutcome(null);
     try {
-      const result = await scanNode(teamCode, token);
+      const result = await scanNode(teamCode, trimmed);
       if (!result.ok) {
         setOutcome({ kind: "error", message: result.error });
         return;
@@ -37,15 +41,27 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
         return;
       }
       if (result.data.kind === "decoy") {
-        setOutcome({ kind: "decoy", passage: result.data.passage, locationName: result.data.locationName });
+        setOutcome({
+          kind: "decoy",
+          passage: result.data.passage,
+          locationName: result.data.locationName,
+        });
         return;
       }
       setOutcome({ kind: "story" });
       router.push(`/team/${teamCode}/testimony`);
     } finally {
       setBusy(false);
-      submittingRef.current = false;
+      // Stay locked after a result so the camera cannot spam the server.
+      // Unlock only via "Try again" (or navigation away).
     }
+  }
+
+  function unlockForRetry() {
+    lockedRef.current = false;
+    setLocked(false);
+    setOutcome(null);
+    setManualToken("");
   }
 
   useEffect(() => {
@@ -59,14 +75,13 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
         html5QrRef.current = instance;
         await instance.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 240, height: 240 } },
+          { fps: 5, qrbox: { width: 240, height: 240 } },
           (decodedText) => {
             handleToken(decodedText.trim());
           },
           () => {}
         );
         if (cancelled) {
-          // Unmounted while start() was in flight; stop what we just started.
           instance.stop().catch(() => {}).finally(() => instance.clear());
           return;
         }
@@ -108,7 +123,11 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
     <div className="flex flex-col gap-5">
       <div className="paper-card rounded-sm p-3">
         {!cameraError ? (
-          <div id="qr-scan-region" ref={scannerRef} className="w-full aspect-square rounded-sm overflow-hidden bg-ink" />
+          <div
+            id="qr-scan-region"
+            ref={scannerRef}
+            className="w-full aspect-square rounded-sm overflow-hidden bg-ink"
+          />
         ) : (
           <div className="w-full aspect-[3/1] rounded-sm bg-ink/5 flex items-center justify-center text-center text-sm text-ink/60 p-4">
             {cameraError}
@@ -134,10 +153,11 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
             placeholder="Paste signed tent code"
             autoCapitalize="off"
             autoCorrect="off"
+            disabled={busy || locked}
           />
           <button
             type="submit"
-            disabled={busy || !manualToken.trim()}
+            disabled={busy || !manualToken.trim() || locked}
             className="btn-oxblood font-chrome uppercase text-xs px-4 rounded-sm"
           >
             Enter
@@ -146,13 +166,27 @@ export default function Scanner({ teamCode }: { teamCode: string }) {
       </form>
 
       {outcome?.kind === "invalid" && (
-        <div className="paper-card rounded-sm p-4 border-l-4 border-oxblood">
+        <div className="paper-card rounded-sm p-4 border-l-4 border-oxblood flex flex-col gap-3">
           <p className="text-sm">{outcome.reason}</p>
+          <button
+            type="button"
+            onClick={unlockForRetry}
+            className="btn-oxblood font-chrome uppercase text-xs px-4 py-3 rounded-sm self-start"
+          >
+            Try again
+          </button>
         </div>
       )}
       {outcome?.kind === "error" && (
-        <div className="paper-card rounded-sm p-4 border-l-4 border-oxblood">
+        <div className="paper-card rounded-sm p-4 border-l-4 border-oxblood flex flex-col gap-3">
           <p className="text-sm">{outcome.message}</p>
+          <button
+            type="button"
+            onClick={unlockForRetry}
+            className="btn-oxblood font-chrome uppercase text-xs px-4 py-3 rounded-sm self-start"
+          >
+            Try again
+          </button>
         </div>
       )}
       {outcome?.kind === "decoy" && (

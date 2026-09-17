@@ -34,4 +34,4 @@ export const CASE_FACT_OPTIONS = [
   { keyword: "WATCH", label: CASE_FACTS[4] },
 ] as const;
 
-export const PREMISE = `Ringmaster Orlan Vex is found dead beneath the big top at 11:11 PM, the night before the carnival opens. The carousel is still turning when they find him. The west gate has been chained since dusk. Seven performers were inside the fairground. Every one of them has a story, and most of those stories are lies — but only one of them is lying about murder.`;
+export const PREMISE = `Ringmaster Orlan Vex is found dead behind the puppet curtain at 11:11 PM, the night before the carnival opens. The carousel is still turning when they find him. The west gate has been chained since dusk. Seven performers were inside the fairground. Every one of them has a story, and most of those stories are lies — but only one of them is lying about murder.`;
