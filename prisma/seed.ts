@@ -66,6 +66,7 @@ async function main() {
         name: "Mr. Quill",
         role: "The Ticket Master",
         flavourText: "Counted every soul through the gate.",
+        isMurderer: true,
         order: 3,
       },
     }),
@@ -98,7 +99,6 @@ async function main() {
         name: "Ostrin",
         role: "The Puppeteer",
         flavourText: "Pulls strings for a living.",
-        isMurderer: true,
         order: 7,
       },
     }),
@@ -113,7 +113,7 @@ async function main() {
       suspectId: vireya.id,
       locationName: "The Divination Tent",
       locationDescription:
-        "Library Steps — a dark cloth over a small table, a deck of cards, a lantern. QR taped under the table edge, out of the rain.",
+        "Main entrance gate — a dark cloth over a small table, a deck of cards, a hand-lamp. QR taped under the table edge.",
       act: 1,
     },
     {
@@ -121,7 +121,7 @@ async function main() {
       suspectId: kalo.id,
       locationName: "The Painted Booth",
       locationDescription:
-        "Cafeteria Colonnade — a mirror propped against a pillar, paint pots scattered about. QR taped to the mirror frame.",
+        "Selfie Point — a mirror propped for portraits, paint pots scattered about. QR taped to the mirror frame.",
       act: 1,
     },
     {
@@ -129,7 +129,7 @@ async function main() {
       suspectId: quill.id,
       locationName: "The Ticket Wagon",
       locationDescription:
-        "Admin Block Portico — a small table styled as a ticket booth, hand-lettered sign. QR pinned to the sign.",
+        "Library — a small table styled as a ticket booth among the stacks, hand-lettered sign. QR pinned to the sign.",
       act: 1,
     },
     {
@@ -137,7 +137,7 @@ async function main() {
       suspectId: bahri.id,
       locationName: "The Fire Pit",
       locationDescription:
-        "Amphitheatre — a ring of stones, unlit torches. QR staked into the ground on a small placard.",
+        "Sports Ground — a ring of stones, unlit torches at the field edge. QR staked into the ground on a small placard.",
       act: 2,
     },
     {
@@ -145,7 +145,7 @@ async function main() {
       suspectId: duran.id,
       locationName: "The Strongman's Ring",
       locationDescription:
-        "Sports Ground Edge — a chalk circle, a barbell prop. QR taped to the barbell.",
+        "Computer lab — a chalk circle beside the benches, a barbell prop. QR taped to the barbell.",
       act: 2,
     },
     {
@@ -153,7 +153,7 @@ async function main() {
       suspectId: twins.id,
       locationName: "The Trapeze Rig",
       locationDescription:
-        "Central Lawn — two poles strung with fabric ribbon. QR tied to the ribbon at head height.",
+        "Mess — two poles strung with fabric ribbon near the dining hall. QR tied to the ribbon at head height.",
       act: 2,
     },
     {
@@ -161,7 +161,7 @@ async function main() {
       suspectId: ostrin.id,
       locationName: "The Puppet Stage",
       locationDescription:
-        "Old Auditorium Backstage — a small curtained booth with a puppet on a stand. QR pinned to the curtain.",
+        "Fire Extinguisher — a small curtained booth staged beside a mounted extinguisher. QR pinned to the curtain.",
       act: 3,
     },
     {
@@ -169,7 +169,7 @@ async function main() {
       suspectId: null as string | null,
       locationName: "The Watchman's Post",
       locationDescription:
-        "West Gate — a lantern hung on the chained gate itself. QR tied to the lantern.",
+        "Physics Lab — a lantern hung by the lab door. QR tied to the lantern.",
       act: 3,
     },
   ];
@@ -193,58 +193,57 @@ async function main() {
     {
       locationName: "The Boiler Shed",
       locationDescription:
-        "Utility block behind the Cafeteria — keep this one genuinely out of the way so only misled teams stumble onto it.",
+        "Water cooler — keep this one genuinely out of the way so only misled teams stumble onto it.",
       decoyPool: "act1",
-      decoyPassage: `The shed is cold and empty, coal long gone to ash. A scrap of paper flutters against the grate: WRONG TENT. The carnival keeps its secrets elsewhere.`,
+      decoyPassage: `The cooler hums and drips. A scrap of paper sticks to the tray: WRONG TENT. The carnival keeps its secrets elsewhere.`,
     },
     {
       locationName: "The Prop Wagon",
-      locationDescription: "Service lane behind the Colonnade — a locked wagon of unused canvas and rope.",
+      locationDescription: "Map of campus — a posted plan where lost feet pause and wrong turns begin.",
       decoyPool: "act1",
-      decoyPassage: `The wagon door sticks, then gives. Inside: rope, canvas, dust. No testimony waits here — only the cost of a wrong reading.`,
+      decoyPassage: `You have studied every path and still arrived nowhere useful. No testimony waits on a wall map — only the cost of a wrong reading.`,
     },
     {
       locationName: "The Rain Barrel Court",
-      locationDescription: "Side yard near the Library Steps — three barrels catching tonight's weather.",
+      locationDescription: "Mechanical lab — benches of metal, oil, and unfinished machines.",
       decoyPool: "act1",
-      decoyPassage: `Rain ticks into the barrels like a clock you cannot stop. You have followed a lie to water and wood.`,
+      decoyPassage: `Gears sit half-assembled under misted windows. You have followed a lie to steel and silence.`,
     },
     {
       locationName: "The Flooded Ditch",
-      locationDescription: "Low drainage point near the Sports Ground.",
+      locationDescription: "Canteen — steam, trays, and the wrong kind of gathering.",
       decoyPool: "act2",
-      decoyPassage: `Rainwater has turned the ditch to black soup. Nothing waits here but your own reflection, unimpressed.`,
+      decoyPassage: `The canteen smells of spice and haste. Nothing waits here but your own reflection in a steel tray, unimpressed.`,
     },
     {
       locationName: "The Sawdust Heap",
-      locationDescription: "Behind the Strongman's Ring — a soft mound from yesterday's rehearsal.",
+      locationDescription: "Parking — rows of empty metal waiting out the night.",
       decoyPool: "act2",
-      decoyPassage: `Sawdust clings to your shoes. Whatever clue you hoped for has already been swept into this pile.`,
+      decoyPassage: `Gravel underfoot, vehicles asleep. Whatever clue you hoped for has already driven away.`,
     },
     {
       locationName: "The Broken Calliope",
-      locationDescription: "Near the Amphitheatre edge — a calliope shell with silent keys.",
+      locationDescription: "Final year classroom — chalk dust and desks that know the exit better than the entrance.",
       decoyPool: "act2",
-      decoyPassage: `The keys do not answer. The carnival's music died earlier than your patience.`,
+      decoyPassage: `The boards do not answer. The carnival's music died earlier than your patience.`,
     },
     {
       locationName: "The Crow's Nest",
-      locationDescription:
-        "Water-tower stairwell / lookout point near the West Gate.",
+      locationDescription: "Hostel sign board — notices, curfews, and names in bold.",
       decoyPool: "act3",
-      decoyPassage: `The lookout tower is empty, its ladder slick with rain, its view good for nothing but watching your team's time slip away.`,
+      decoyPassage: `The board is crowded with other people's business. Its view is good for nothing but watching your team's time slip away.`,
     },
     {
       locationName: "The Costume Trunk",
-      locationDescription: "Back corridor of the Old Auditorium — a trunk of empty coats.",
+      locationDescription: "Second entrance gate — the quieter threshold fewer feet remember.",
       decoyPool: "act3",
-      decoyPassage: `Silk and mothballs. No murderer hides in a sleeve tonight — only your mistake.`,
+      decoyPassage: `The second gate is shut and unhelpful. No murderer hides in a side door tonight — only your mistake.`,
     },
     {
       locationName: "The Silent Carousel",
-      locationDescription: "Carousel apron — animals frozen mid-gallop since the bell failed.",
+      locationDescription: "College transformer — humming gear tucked where crowds rarely linger.",
       decoyPool: "act3",
-      decoyPassage: `The animals do not move. You already knew the carousel's silence; returning here only spends the clock.`,
+      decoyPassage: `The transformer hums on without you. Returning here only spends the clock.`,
     },
   ];
 

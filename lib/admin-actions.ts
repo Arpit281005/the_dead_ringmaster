@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/db";
 import { requireAdmin, setAdminSession, clearAdminSession, verifyAdminSession } from "@/lib/admin-auth";
 import { getGameConfig } from "@/lib/admin-team-insight";
-import { grantEmittedFactsBeforeIndex } from "@/lib/grant-team-facts";
+import { grantEmittedFactsBeforeIndex, grantClearancesBeforeIndex } from "@/lib/grant-team-facts";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { TOTAL_STORY_NODES } from "@/lib/state";
 import { headers } from "next/headers";
@@ -67,15 +67,17 @@ export async function forceAdvanceTeam(teamCode: string) {
   if (team.status === "FINISHED") return { ok: false as const, error: "Team already finished." };
 
   const next = Math.min(team.currentIndex + 1, TOTAL_STORY_NODES);
-  // Grant Case Notes from tents being skipped so later tents are not soft-locked.
+  // Grant Case Notes + clearances from tents being skipped so later tents /
+  // accusation are not soft-locked or over-stocked with uncleared suspects.
   const granted = await grantEmittedFactsBeforeIndex(team.id, team.teamSeed, next);
+  const clearances = await grantClearancesBeforeIndex(team.id, team.teamSeed, next);
   await prisma.team.update({
     where: { id: team.id },
     data: { currentIndex: next },
   });
   await logAction(
     "FORCE_ADVANCE",
-    { from: team.currentIndex, to: next, factsGranted: granted },
+    { from: team.currentIndex, to: next, factsGranted: granted, clearancesGranted: clearances },
     team.id
   );
   revalidatePath("/admin");
@@ -92,7 +94,12 @@ export async function repairTeamFacts(teamCode: string) {
   if (!team) return { ok: false as const, error: "Team not found." };
 
   const granted = await grantEmittedFactsBeforeIndex(team.id, team.teamSeed, team.currentIndex);
-  await logAction("REPAIR_FACTS", { currentIndex: team.currentIndex, factsGranted: granted }, team.id);
+  const clearances = await grantClearancesBeforeIndex(team.id, team.teamSeed, team.currentIndex);
+  await logAction(
+    "REPAIR_FACTS",
+    { currentIndex: team.currentIndex, factsGranted: granted, clearancesGranted: clearances },
+    team.id
+  );
   revalidatePath("/admin");
   revalidatePath(`/admin/teams/${team.teamCode}`);
   revalidatePath(`/team/${team.teamCode}`);

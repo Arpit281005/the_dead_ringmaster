@@ -4,6 +4,7 @@ import type { StoryNodeTemplate } from "./types";
  * Narrative templates for per-team resolution.
  * Location/suspect identity still lives on DB Node rows; solvable content is computed here.
  * Act I (0–2): difficulty unchanged — only silent emitsFact on Quill for later deps.
+ * Second-run prose: new Case File timeline (mist / drum / lanterns / east gate / 10:18).
  */
 export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
@@ -12,57 +13,58 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: [],
     emitsFact: null,
     keySource: null,
-    testimonyFrame: `They will tell you I read palms for coin and call it prophecy. Perhaps. But I read Orlan's hand three summers running, and I will swear to what I know. {{MARK_CLAUSE}} I heard no quarrel, saw no shadow cross the chained west gate — how could I, chained as it was since dusk? Orlan mocked my cards last week, called them a parlour trick, and I forgave him for it, the way you forgive a child. I did not love him. I did not kill him either. Ask the wax. Ask the rain. Ask the silence after the bell.`,
+    testimonyFrame: `They will tell you I trade futures for coin. Perhaps. But I read Orlan's palm three autumns running, and I will swear to what I know. {{MARK_CLAUSE}} I heard no quarrel at the ticket wagon, saw no shadow cross the barred east gate — how could I, barred as it was since dusk? Orlan mocked my cards last week, called them smoke and theatre, and I forgave him for it. I did not love him. I did not kill him either. Ask the mist. Ask the drum. Ask the quiet after ten.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "Three things hold: the rain, the bell, and the watch that stopped at his wrist. I was in this tent when the rain began, mixing wax, counting candles, and waiting for a client who never came. The bell rang its last honest hour at eleven. I stayed with wax and cards; when the generator failed at twenty past, there was only my own lamplight, guttering low.",
+          "Three things hold: the mist, the drum, and the watch that cracked at his wrist. I was in this tent when the mist settled, shuffling cards, trimming wicks, and waiting for a client who never came. The drum rolled its last honest hour at ten. I stayed with wax and cards under my own hand-lamp after that — no fourth clock-bite to invent.",
       },
       {
         mark: "NONE",
         clause:
-          "I keep three certainties: rain that began at forty past ten, the last honest bell at eleven, and the watch frozen at his wrist. I stayed in this tent after the rain began — trimming wicks, stacking cards, and listening to the canvas drum — while the west gate stayed chained as it had since dusk.",
+          "I keep three certainties: mist that settled at forty-five past nine, the last honest drum at ten, and the watch cracked at his wrist. I stayed in this tent after the mist settled — cutting cards, stacking coins for readings, and listening to canvas breathe — while the east gate stayed barred as it had since dusk.",
       },
       {
         mark: "NONE",
         clause:
-          "Ask me three times and I answer the same: rain, bell, watch. I mixed wax, counted candles, and waited for no one, under my own lamplight after the generator failed at twenty past eleven.",
+          "Ask me three times and I answer the same: mist, drum, lanterns. I shuffled cards and trimmed wicks when the mist settled; the drum's last honest hour found me still waiting; after the lanterns failed at half past ten I worked by hand-lamp alone.",
       },
     ],
     lyingVariants: [
       {
         mark: "THREE",
         clause:
-          "I will swear to four things I know: the rain, the bell, the watch that stopped at his wrist, and the lantern I never lit. I was in this tent when the rain began, mixing wax and waiting — rhythm broken, count wrong.",
+          "I will swear to four things I know: the mist, the drum, the watch that cracked at his wrist, and the lantern I never lit. I was in this tent when the mist settled, shuffling cards and waiting — rhythm broken, count wrong.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "I was in this tent when the rain began, mixing wax, counting candles, waiting. The west gate opened once for a late client — I saw the chain undone myself — and then the rain, the bell, and the watch that stopped.",
+          "I was in this tent when the mist settled, shuffling cards, trimming wicks, waiting. The east gate opened once for a late client — I saw the bar lifted myself — and then the mist, the drum, and the watch that cracked.",
       },
       {
         mark: "NAME",
         clause:
-          "I read the Ringmaster's hand three summers running. I was in this tent when the rain began, mixing wax, counting candles, and waiting for a client who never came. The bell rang its last honest hour at eleven.",
+          "I read the Ringmaster's hand three autumns running. I was in this tent when the mist settled, shuffling cards, trimming wicks, and waiting for a client who never came. The drum rolled its last honest hour at ten.",
       },
     ],
     nextHints: [
-      "Every story starts where I stand — the first line you cross, the last line you'll scan. Find me before the tale begins.",],
+      "Where faces freeze for strangers and smiles are rented by the second — seek the spot built for the camera, not the queue.",
+    ],
     decoyHints: {
       "The Boiler Shed": [
-        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
+        "Cold metal, a drip, a plastic cup that never empties the same way twice. Thirst stops here between classes.",
       ],
       "The Prop Wagon": [
-        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
+        "Ink and arrows claiming to know every path. Stand where the lost unfold paper before they walk.",
       ],
       "The Rain Barrel Court": [
-        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
+        "Oil, torque, and unfinished engines. Find the room that teaches metal how to move.",
       ],
     },
     mirrorStyles: ["directional", "negation"],
     clearReason:
-      "Cleared — the wax, the rain, the silence after the bell all hold; her tent never emptied that night.",
+      "Cleared — the mist, the cards, the quiet after the drum all hold; her tent never emptied that night.",
   },
   {
     sequenceIndex: 1,
@@ -70,48 +72,48 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     dependsOnFactKeys: [],
     emitsFact: null,
     keySource: null,
-    testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The bell rang its hours, the rain fell, the gate stayed chained — I know because I checked it myself, twice, out of nothing but boredom. When the generator failed I worked by lamplight and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the big top. Ask anyone. Ask no one. It hardly matters which.`,
+    testimonyFrame: `Paint doesn't lie, they say, but paint is the only thing about me that's honest. {{MARK_CLAUSE}} I laughed too. That was the last time I saw him breathing. The drum rolled its hours, the mist fell, the east gate stayed barred — I know because I checked it myself, twice, out of nothing but habit. When the lanterns failed I worked by hand-lamp and kept painting, because a painted man without his face is just a man, and I could not bear to be just a man that night. I did not go near the ticket wagon. Ask anyone. Ask no one. It hardly matters which.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "I was in the booth all night — mixing white, mixing red, mixing black — three bowls and no more, layering my face until it wasn't mine anymore. Orlan came by before the rain, laughed at my nose, said I looked like a bruise that never healed.",
+          "I was in the booth all night — mixing white, mixing red, mixing black — three bowls and no more, layering my face until it wasn't mine anymore. Orlan came by before the mist, laughed at my nose, said I looked like a bruise that never healed.",
       },
       {
         mark: "NONE",
         clause:
-          "I stayed at the mirror: white, red, and black in triad, never a fourth. The paint dried between the rain's start and the generator's death. Orlan came by before the rain and laughed at the face that wasn't mine.",
+          "I stayed at the mirror: white, red, and black in triad, never a fourth. The paint dried between the mist's settling and the lanterns' death. Orlan came by before the mist and laughed at the face that wasn't mine.",
       },
     ],
     lyingVariants: [
       {
         mark: "THREE",
         clause:
-          "I was in the booth all night — mixing white, mixing red, mixing black, mixing gold, layering my face until it wasn't mine anymore. Orlan came by before the rain, laughed at my nose, said I looked like a bruise that never healed.",
+          "I was in the booth all night — mixing white, mixing red, mixing black, mixing gold, layering my face until it wasn't mine anymore. Orlan came by before the mist, laughed at my nose, said I looked like a bruise that never healed.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "I was in the booth all night — mixing white, mixing red, mixing black — three bowls. After the rain I walked the west gate and found it open a crack, then painted on. Orlan had already come by before the rain.",
+          "I was in the booth all night — mixing white, mixing red, mixing black — three bowls. After the mist I walked the east gate and found it open a crack, then painted on. Orlan had already come by before the mist.",
       },
       {
         mark: "NAME",
         clause:
-          "I was in the booth all night — mixing white, mixing red, mixing black. The Ringmaster came by before the rain, laughed at my nose, said I looked like a bruise that never healed.",
+          "I was in the booth all night — mixing white, mixing red, mixing black. The Ringmaster came by before the mist, laughed at my nose, said I looked like a bruise that never healed.",
       },
     ],
     nextHints: [
-      "Not the door everyone uses — the quieter way in, the one fewer feet remember.",
+      "Where silence is shelved in rows and knowledge waits behind a door you push with care — follow the hush, not the crowd.",
     ],
     decoyHints: {
       "The Boiler Shed": [
-        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
+        "Cold metal, a drip, a plastic cup that never empties the same way twice. Thirst stops here between classes.",
       ],
       "The Prop Wagon": [
-        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
+        "Ink and arrows claiming to know every path. Stand where the lost unfold paper before they walk.",
       ],
       "The Rain Barrel Court": [
-        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
+        "Oil, torque, and unfinished engines. Find the room that teaches metal how to move.",
       ],
     },
     mirrorStyles: ["negation", "directional"],
@@ -122,59 +124,59 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     sequenceIndex: 2,
     decoyPool: "act1",
     dependsOnFactKeys: [],
+    truthPolicy: "fixed-true",
     emitsFact: {
-      key: "quill_gate_chained",
-      text: "The west gate stayed chained from dusk; Quill never opened it. Cipher stamp: CHAIN.",
-      cipherKey: "CHAIN",
+      key: "quill_east_barred",
+      text: "The east gate stayed barred from dusk; Quill never lifted the bar. Cipher stamp: TICKET.",
+      cipherKey: "TICKET",
     },
     keySource: null,
-    testimonyFrame: `I counted them in — three by three, family by family, laugh by laugh — one hundred and eighty-one souls through my gate before the rain began. I have never lost count in eleven years and I did not lose it that night. {{MARK_CLAUSE}} Orlan trusted me with the coin box and I have never once shorted him a shilling. I saw the Painted Man cross the yard, I saw the twins arguing by their rig, I saw nothing of murder in any of it. The rain did not frighten me. The dark did not frighten me. Only the silence after, when the bell would not ring and no one would tell me why, frightened me enough to sit down on my own ticket stool and wait for someone braver than I am to go and look.`,
+    // Murderer: always truthful; accusation keystone seeded per team.
+    testimonyFrame: `{{MARK_CLAUSE}}`,
     truthfulVariants: [
       {
         mark: "NONE",
-        clause:
-          "The west gate stayed chained from dusk; I never touched the lock. I counted by threes until the rain, then sat with the coin box under lamplight after the generator failed.",
+        accusationFactKeyword: "EAST_GATE",
+        clause: `I counted them in — three by three, family by family, laugh by laugh — one hundred and sixty-two souls past my rope before the mist settled. I have never lost count in eleven years and I did not lose it that night. The east gate stayed barred from dusk; I never touched the bar. I sat with the coin box under hand-lamp after the lanterns failed. Orlan trusted me with the takings and I have never once shorted him a shilling — so I will swear. I saw the Painted Man cross the yard, I saw the twins arguing by their rig, I saw nothing of murder in any of it. The mist did not frighten me. The dark did not frighten me. Only the silence after, when the drum would not roll and no one would tell me why, frightened me enough to sit down on my own ticket stool and wait for someone braver than I am to go and look. Remember the word stamped on every stub I tear: TICKET — it is how the night keeps score.`,
       },
       {
         mark: "NONE",
-        clause:
-          "Three duties: count, chain, wait. The gate never opened. The rain began on schedule. The watch at Orlan's wrist, they say, stopped at eleven-eleven — I was nowhere near it.",
+        accusationFactKeyword: "MIST",
+        clause: `Three duties: count, bar, wait. The east gate never opened. The mist settled on schedule. Orlan's watch, they say, cracked at ten-eighteen — I was nowhere near it. I counted them in until the mist, then sat with the coin box. I saw no quarrel worth reporting. The parade drum had already gone quiet when I trimmed the lamp wick. On every stub I tear, the carnival prints one word in bold: TICKET — keep that stamp; nights like this lose track of paper.`,
+      },
+      {
+        mark: "NONE",
+        accusationFactKeyword: "DRUM",
+        clause: `I counted by threes until the mist, then sat. Three anchors only: mist settling, the drum's last honest hour at ten, and the lanterns failing at half past — after that I kept the stool by hand-lamp. The east gate stayed barred; my counting did not falter. Orlan trusted me with the coin box. I never lifted the east bar. If you need a cipher later, take the word from my trade itself — TICKET — printed on every stub I tear.`,
+      },
+      {
+        mark: "NONE",
+        accusationFactKeyword: "LANTERN",
+        clause: `I counted them in — three by three — before the mist, then kept the stool when the lanterns failed at half past ten. Hand-lamps only after that. The east gate stayed barred from dusk. The drum had already gone quiet at ten while I tore stubs at this same wagon. I never shorted the box. On the stubs: one stamp, always the same — TICKET — so the ledger and the night agree.`,
+      },
+      {
+        mark: "NONE",
+        accusationFactKeyword: "WATCH",
+        clause: `Three anchors I will not bend: the mist settled; the drum went quiet at ten; they say his watch cracked at ten-eighteen while I was still tearing stubs at this wagon. The east gate stayed barred. I did not leave the stool. Stamp this for later: TICKET — the word my trade lives by.`,
       },
     ],
-    lyingVariants: [
-      {
-        mark: "CASEFILE",
-        clause:
-          "I opened the west gate myself just after eleven, let old Bahri's cousin through with a lantern, and chained it again after.",
-      },
-      {
-        mark: "THREE",
-        clause:
-          "I counted them in — pairs and pairs, then a leftover soul — my rhythm broken before the rain. The gate stayed chained; my counting did not.",
-      },
-      {
-        mark: "NAME",
-        clause:
-          "The Ringmaster trusted me with the coin box. I never opened the west gate. I sat through the rain and the dark.",
-      },
-    ],
+    lyingVariants: [],
     nextHints: [
-      "I announce what others whisper — curfews, warnings, names in bold. Read me where the residents sleep.",
+      "Open chalk, open sky, and the sound of someone else's whistle — where speed is measured in lanes, not pages.",
     ],
     decoyHints: {
       "The Boiler Shed": [
-        "Climb till your legs remember the count. On the second landing, thirst finds its answer — cold, clear, and waiting.",
+        "Cold metal, a drip, a plastic cup that never empties the same way twice. Thirst stops here between classes.",
       ],
       "The Prop Wagon": [
-        "Where spoons clatter and steam tells no lies, follow your nose past the smell of fried onions and spice.",
+        "Ink and arrows claiming to know every path. Stand where the lost unfold paper before they walk.",
       ],
       "The Rain Barrel Court": [
-        "Gears, grease, and the smell of metal being taught new shapes. Where things are built before they're believed.",
+        "Oil, torque, and unfinished engines. Find the room that teaches metal how to move.",
       ],
     },
     mirrorStyles: ["reversed", "negation"],
-    clearReason:
-      "Cleared — the gate stayed chained no matter what he claimed; his count still holds true.",
+    clearReason: null,
   },
   // —— Act II ——
   {
@@ -182,108 +184,101 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
     decoyPool: "act2",
     dependsOnFactKeys: [],
     emitsFact: {
-      key: "bahri_pit_bandage",
-      text: "Bahri's hands were bandaged from burns; he worked the fire pit from the rain through the generator's death. Cipher stamp: BANDAGE.",
-      cipherKey: "BANDAGE",
+      key: "bahri_ember_scar",
+      text: "Bahri's hands were scarred from burns; he worked the fire pit from the mist through the lanterns' death. Cipher stamp: SCAR.",
+      cipherKey: "SCAR",
     },
     keySource: { type: "volunteer_word" },
-    volunteerWord: "CINDER",
-    // Frame holds shared prose; Mark IV anchors live entirely in the clause.
-    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. Every cinder that kissed my palms is still there under the cloth. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the big top, did not hear the carousel stop turning, did not see anyone near the west gate, chained as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
+    volunteerWord: "EMBER",
+    testimonyFrame: `Fire forgives nothing, and it has never forgiven me — look at my hands, wrapped twice over since Tuesday, and ask if a man like that could have gripped a rope, a blade, a throat. Every ember that kissed my palms is still there under the cloth. {{MARK_CLAUSE}} I liked Orlan well enough, though he never paid what he owed. We spoke of debts once, briefly, and I told him fire doesn't care who's rich. He laughed at that. I did not go near the ticket wagon, did not hear the drum stop rolling, did not see anyone near the east gate, barred as it was. Believe me or don't. My hands can't lie even if I wanted them to.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "I was practising when the rain began: swallow, breathe, swallow again — three long pulls of flame that lit the yard blue. The bell tolled its last true hour and I kept working. After the generator died I worked by lamplight, same as always, same as every night this fortnight.",
+          "I was practising when the mist settled: swallow, breathe, swallow again — three long pulls of flame that lit the yard blue. The drum rolled its last true hour and I kept working. After the lanterns died I worked by hand-lamp, same as always, same as every night this fortnight. Say the word with me if you must unlock a later riddle: EMBER — it lives under every wrap.",
       },
       {
         mark: "NONE",
         clause:
-          "Three anchors only: when the rain began I was already at the pit; the bell's last honest hour found me still swallowing flame; when the generator failed I switched to lamplight and did not leave.",
+          "Three anchors only: when the mist settled I was already at the pit; the drum's last honest hour found me still swallowing flame; when the lanterns failed I switched to hand-lamp and did not leave. The cloth hides a truth you can taste: EMBER — keep that word for the cipher ahead.",
       },
     ],
     lyingVariants: [
       {
         mark: "RECKONING",
         clause:
-          "I was practising from half past ten: swallow, breathe, swallow again — three long pulls of flame. When the rain began I did not stop. The bell tolled its last true hour and I kept working. After the generator died I worked by lamplight, same as always.",
+          "I was practising from half past nine: swallow, breathe, swallow again — three long pulls of flame. When the mist settled I did not stop. After the lanterns died I worked by hand-lamp, same as always — two true clock-bites only; the parade hour never registered for me. An EMBER under the wrap still burns.",
       },
       {
         mark: "RECKONING",
         clause:
-          "I worked the pit when the rain began and again after the generator died — two clock-bites and no more, because a burned man counts what hurts and forgets the bell.",
+          "I worked the pit when the mist settled and again after the lanterns died — two clock-bites and no more, because a burned man counts what hurts and forgets the parade hour. The cloth still smells of EMBER.",
       },
     ],
     nextHints: [
-      "Open sky above, chalk lines below — where whistles decide who's fast and who's slow.",
+      "Screens glow colder than any carnival lamp. Find the room where keyboards click and problems compile.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
-
+        "Trays, steam, and a queue that never quite ends. Follow the smell of spice, not the sound of study.",
       ],
       "The Sawdust Heap": [
-        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
-        ,
+        "Lined metal bodies waiting for drivers who already left. Stand where engines sleep in numbered rows.",
       ],
       "The Broken Calliope": [
-        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
+        "Desks that have heard four years of the same excuses. Those closest to leaving know this room by heart.",
       ],
     },
     mirrorStyles: ["antonym", "directional"],
     clearReason:
-      "Cleared — his hands could not have done it; the fire pit held him through the generator's death.",
+      "Cleared — his hands could not have done it; the fire pit held him through the lanterns' death.",
   },
   {
     sequenceIndex: 4,
     decoyPool: "act2",
-    dependsOnFactKeys: ["bahri_pit_bandage"],
+    dependsOnFactKeys: ["bahri_ember_scar"],
     emitsFact: {
-      key: "duran_shed_shape",
-      text: "A bandaged figure was seen at the generator shed after the bell died; Bahri was not that figure. Cipher stamp: SHED.",
-      cipherKey: "SHED",
+      key: "duran_yard_shape",
+      text: "A wrapped figure was seen at the equipment yard after the drum died; Bahri was not that figure.",
     },
-    keySource: { type: "earlier_node_fact", factKey: "bahri_pit_bandage" },
-    testimonyFrame: `Strength is a slow thing, people forget that. I do not move quick, I move certain — one lift, one plant, one hold, and the crowd forgets to breathe. {{MARK_CLAUSE}} Orlan came by once, asked if I'd lift the new frame myself and save him a labourer's wage. I said I would, for a fair cut. He laughed and walked off toward the big top, and that's the last true thing I know of him — walking, laughing, alive. I stayed with my ropes till the shouting started.`,
+    keySource: { type: "earlier_node_fact", factKey: "bahri_ember_scar" },
+    testimonyFrame: `Strength is a slow thing, people forget that. I do not move quick, I move certain — one lift, one plant, one hold, and the crowd forgets to breathe. {{MARK_CLAUSE}} Orlan came by once, asked if I'd lift the new frame myself and save him a labourer's wage. I said I would, for a fair cut. He laughed and walked off toward the ticket wagon, and that's the last true thing I know of him — walking, laughing, alive. I stayed with my ropes till the shouting started.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores I do every night before a show. The rain came and I kept working under the awning. Close to half past eleven, after the bell had already gone quiet, I did see a shape near the generator shed, hands wrapped white in the lamplight — didn't think much of it, half the troupe nurses some wound or other, and it was not the fire-eater's walk.",
+          "Three anchors under the awning: when the mist settled I was oiling the rigging; the drum's last honest hour found me still coiling rope; when the lanterns failed I tested the frame by hand-lamp and did not leave. Same three chores I do every night before a show. After the drum had already gone quiet I did see a shape near the equipment yard, hands wrapped white — didn't think much of it, and it was not the fire-eater's walk.",
       },
       {
         mark: "NONE",
         clause:
-          "Three chores under the awning: oil, coil, test. Rain on the canvas. After the bell died I glimpsed a bandaged shape by the generator — not Bahri's gait, not the pit's man — then returned to the ropes.",
+          "Three chores, three anchors: oil when the mist came, coil through the drum's last hour, test after the lanterns died. Under the awning the whole time. After the drum died I glimpsed a wrapped shape by the equipment yard — not Bahri's gait, not the pit's man — then returned to the ropes.",
       },
     ],
     lyingVariants: [
       {
         mark: "CASEFILE",
         clause:
-          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores. The rain came. Close to half past eleven, after the bell had already gone quiet, I saw Bahri by the generator shed, hands wrapped white, clear as lamplight — the fire-eater, away from his pit.",
+          "That night I was oiling the rigging, coiling the rope, testing the frame — same three chores. The mist came. After the drum died I saw Bahri by the equipment yard, hands wrapped white — and I swear the east gate stood open a crack behind him, clear as hand-lamp, though every Case File says it stayed barred.",
       },
       {
         mark: "THREE",
         clause:
-          "I oiled, coiled, tested, and counted the weights — four chores. After the bell died I swore I saw Bahri bandaged at the generator shed, clear as lamplight.",
+          "I oiled, coiled, tested, and counted the weights — four chores. After the drum died I swore I saw Bahri wrapped at the equipment yard, clear as hand-lamp.",
       },
     ],
     nextHints: [
-      "Silence is the rule here, not the exception. Rows of stacked secrets, guarded by a whisper."
-      ,
+      "Where plates stack louder than applause and dinner finds you before you find a seat — follow steam, not spectacle.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
-
+        "Trays, steam, and a queue that never quite ends. Follow the smell of spice, not the sound of study.",
       ],
       "The Sawdust Heap": [
-        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
-        ,
+        "Lined metal bodies waiting for drivers who already left. Stand where engines sleep in numbered rows.",
       ],
       "The Broken Calliope": [
-        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
+        "Desks that have heard four years of the same excuses. Those closest to leaving know this room by heart.",
       ],
     },
     mirrorStyles: ["directional", "antonym"],
@@ -292,145 +287,155 @@ export const STORY_TEMPLATES: StoryNodeTemplate[] = [
   {
     sequenceIndex: 5,
     decoyPool: "act2",
-    dependsOnFactKeys: ["quill_gate_chained"],
+    dependsOnFactKeys: ["quill_east_barred"],
     emitsFact: null,
-    keySource: { type: "earlier_node_fact", factKey: "quill_gate_chained" },
+    keySource: { type: "earlier_node_fact", factKey: "quill_east_barred" },
     testimonyFrame: `We are two who answer as one, always have been, since our mother taught us that a trapeze forgives no soloists. {{MARK_CLAUSE}} Orlan liked to watch us rehearse, said we were the only honest act in his carnival, which we always took as a joke he half meant. We were together the whole night. We are always together. That is the one truth in all of this.`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry from the afternoon. We heard the rain start, heard the bell stop, heard the generator die somewhere in the dark behind us — we did not leave the poles, did not walk the west gate, did not hear anything from the big top worth reporting.",
+          "That night we chalked our hands, checked the rig, and checked the net — three duties spoken in the same breath. The net was dry from the afternoon. We heard the mist settle, heard the drum stop, heard the lanterns die somewhere in the dark behind us — we did not leave the poles, did not walk the east gate, did not hear anything from the ticket wagon worth reporting.",
       },
       {
         mark: "NONE",
         clause:
-          "Chalk, grip, confidence — our triad. We stayed under silk through rain and generator-death. We never touched the west gate's chain.",
+          "Chalk, grip, confidence — our triad. Three anchors under silk: mist settling, the drum's last hour, the lanterns' death. We never touched the east gate's bar.",
       },
     ],
     lyingVariants: [
       {
         mark: "THREE",
         clause:
-          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because after the generator died we left the poles and walked the west gate, and found the chain hanging slack for a breath before we fled back. We heard the rain start, heard the bell stop, heard the generator die — and we heard the gate complain on its hinge, though Quill swears it never moved.",
+          "That night we chalked our hands, checked the rig, and — the net. We tell each other everything in threes, chalk and grip and confidence, but that night the words came out wrong, uneven, because after the lanterns died we left the poles and walked the east gate, and found the bar hanging slack for a breath before we fled back. We heard the mist settle, heard the drum stop, heard the lanterns die — and we heard the gate complain on its hinge, though Quill swears it never moved.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "Three duties at the poles, then a walk: after the generator died we found the west gate unchained for a breath and fled back to the net.",
+          "Three duties at the poles, then a walk: after the lanterns died we found the east gate unbarred for a breath and fled back to the net.",
       },
     ],
     nextHints: [
-      "Red and silent, I wait for disaster that (hopefully) never comes. Find me mounted near danger, never far from an exit.",
+      "Painted red, hung for the day no one wants — I wait on a wall near exits, hoping you never need me.",
     ],
     decoyHints: {
       "The Flooded Ditch": [
-        "I show you everywhere at once, yet I stand still myself. Find me where the lost first look before they walk.",
-
+        "Trays, steam, and a queue that never quite ends. Follow the smell of spice, not the sound of study.",
       ],
       "The Sawdust Heap": [
-        "Four years of chalk dust settle here. Those closest to leaving are the ones who know this room best."
-        ,
+        "Lined metal bodies waiting for drivers who already left. Stand where engines sleep in numbered rows.",
       ],
       "The Broken Calliope": [
-        "Not fine dining, not quite home — but the smell of dinner always finds its way here first.",
+        "Desks that have heard four years of the same excuses. Those closest to leaving know this room by heart.",
       ],
     },
     mirrorStyles: ["negation", "reversed"],
     clearReason:
-      "Cleared — together at the poles; the gate's chain was never theirs to find slack.",
+      "Cleared — together at the poles; the east gate's bar was never theirs to find slack.",
   },
   // —— Act III ——
   {
     sequenceIndex: 6,
     decoyPool: "act3",
     dependsOnFactKeys: [],
-    truthPolicy: "fixed-true",
     emitsFact: {
-      key: "ostrin_stage_lamp",
-      text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the big top before the rain. Cipher stamp: LAMP.",
-      cipherKey: "LAMP",
+      key: "ostrin_resin_stage",
+      text: "Ostrin remained behind the puppet stage; Orlan left that booth laughing toward the ticket wagon before the mist. Cipher stamp: WOOD.",
+      cipherKey: "WOOD",
     },
     keySource: { type: "volunteer_word" },
-    volunteerWord: "STRING",
-    // Red herring: appears to break Mark I / III on a careless read; always truthful.
-    testimonyFrame: `{{MARK_CLAUSE}}`,
-    truthfulVariants: [
-      {
-        mark: "NONE",
-        accusationFactKeyword: "WEST_GATE",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness for tomorrow's opening, testing the joints, rehearsing the one line he insisted I include about himself — three labours, and the line is part of the testing, not a fourth. One string slipped and I tied it twice; the word string still tastes like resin on my tongue. The rain didn't reach me back there. The bell rang its last hour and I remember thinking the strings had gone quiet too, as if something in the tent was listening. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. I did not need to. A puppeteer's hands were full that night, and wood does not confess to murder no matter how long you hold it.`,
-      },
-      {
-        mark: "NONE",
-        accusationFactKeyword: "GENERATOR",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing Orlan's likeness, testing the joints, rehearsing the one line he insisted I include — three labours, nothing more. Every string on that frame was mine to keep taut. When the lights died and the yard went to lamplight I was still there with the wood. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. A puppeteer's hands were full that night.`,
-      },
-      {
-        mark: "NONE",
-        accusationFactKeyword: "BELL",
-        clause: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. I was behind the stage all evening: stringing, testing, rehearsing — three labours. The carousel bell rang its last honest hour and I remember thinking the strings had gone quiet too. Orlan visited once, early, before the rain — checked my work, tapped the jaw of his own likeness, and said it was "too honest a face for a liar's trade," laughing at the wood, not at a title. He left toward the big top. I did not follow him. Wood does not confess to murder no matter how long you hold it.`,
-      },
-    ],
-    // Unused under truthPolicy fixed-true; kept empty so seeded lies cannot fire.
-    lyingVariants: [],
-    nextHints: [
-      "Where forces are measured and light bends on command — the room that explains why things fall.",
-    ],
-    decoyHints: {
-      "The Crow's Nest": [
-        "I hum where no one lingers, tucked behind the building everyone walks past but never enters. Follow the sound, not the crowd.",
-      ],
-      "The Costume Trunk": [
-        "Rows of metal that arrived full of people and now stand empty, waiting for the day to end.",
-      ],
-      "The Silent Carousel": [
-        "Not far from minds that chase the grade,I sit in shade where worries fade.",
-        "No desk, no chalk, no clock to bind — Just rustling leaves to soothe your mind.",
-      ],
-    },
-    mirrorStyles: ["reversed", "directional"],
-    clearReason: null,
-  },
-  {
-    sequenceIndex: 7,
-    decoyPool: "act3",
-    dependsOnFactKeys: ["duran_shed_shape", "ostrin_stage_lamp"],
-    emitsFact: null,
-    keySource: { type: "earlier_node_fact", factKey: "ostrin_stage_lamp" },
-    testimonyFrame: `I keep the gate when Quill sleeps, and that night neither of us slept at all. {{MARK_CLAUSE}} The chained gate never opened, I'd stake my post on it. Orlan crossed my line of sight only once that night, laughing, heading for the big top, and I never saw him walk back out. Make of that what you will. I only watch. I don't judge. But I know where the last lamp was burning, and I know who was standing under it.`,
+    volunteerWord: "RESIN",
+    testimonyFrame: `Everyone thinks a puppeteer is halfway to a liar already — hands that make dead wood speak, why trust the voice behind it? Fair enough. I'll give you what's true and let you doubt it anyway. {{MARK_CLAUSE}}`,
     truthfulVariants: [
       {
         mark: "NONE",
         clause:
-          "I saw three things worth telling: the rain start, the generator die, and the puppet-stage lamp still burning long after every other light in the yard had gone dark. The strongman told his own story of a bandaged shape by the generator shed — I saw that same shape too, only after the generator failed I saw it walk the other way, back toward the stage with the strings, not toward the fire pit at all.",
+          "I was behind the stage all evening: stringing Orlan's likeness, testing the joints, rehearsing the one line — three labours, nothing more. One cord slipped and I tied it twice; the word RESIN still tastes like varnish on my tongue. Three anchors held me there: when the mist settled I was already stringing; the drum's last honest hour found me testing joints; when the lanterns failed I kept rehearsing by hand-lamp. Orlan visited once, early, before the mist — checked my work, tapped the jaw of his own likeness, and said it was \"too honest a face for a liar's trade,\" laughing at the wood. He left toward the ticket wagon. I did not follow him.",
+      },
+      {
+        mark: "NONE",
+        clause:
+          "Three labours, three anchors: stringing through the mist's settling, testing through the drum's last hour, rehearsing after the lanterns died — I never left the wood. RESIN on my fingers proves it. Orlan visited once, early, before the mist, laughing at the likeness. He left toward the ticket wagon. I did not follow him.",
+      },
+    ],
+    lyingVariants: [
+      {
+        mark: "THREE",
+        clause:
+          "I was behind the stage: stringing, testing, rehearsing, and painting the jaw — four labours. RESIN on my hands. Orlan left toward the ticket wagon; I swear I followed him halfway into the mist.",
+      },
+      {
+        mark: "CASEFILE",
+        clause:
+          "Three labours behind the stage. After the mist I walked the east gate and found it open. Orlan had already gone. The word RESIN still sticks to my tongue.",
+      },
+      {
+        mark: "NAME",
+        clause:
+          "I was behind the stage all evening — three labours. The Ringmaster visited once, early, before the mist, laughing at the wood. RESIN, string, and silence: that was my night.",
+      },
+      {
+        mark: "RECKONING",
+        clause:
+          "I stayed with the wood when the mist settled and again after the lanterns failed — two clock-bites only — and I never heard the drum. RESIN on every knot.",
+      },
+    ],
+    nextHints: [
+      "Where falling is a lesson and light learns to bend — seek the room that measures force, not fortune.",
+    ],
+    decoyHints: {
+      "The Crow's Nest": [
+        "Bold names, curfew hours, and paper that speaks for the building where residents sleep. Read the board, not the rumour.",
+      ],
+      "The Costume Trunk": [
+        "Not the threshold the crowd prefers — the quieter gate, the one fewer feet choose twice.",
+      ],
+      "The Silent Carousel": [
+        "I hum where no one lingers, tucked behind the building everyone walks past. Follow the buzz, not the crowd.",
+      ],
+    },
+    mirrorStyles: ["reversed", "directional"],
+    clearReason:
+      "Cleared — his hands stayed with wood and resin; Orlan walked away from the stage alive.",
+  },
+  {
+    sequenceIndex: 7,
+    decoyPool: "act3",
+    dependsOnFactKeys: ["duran_yard_shape", "ostrin_resin_stage"],
+    emitsFact: null,
+    keySource: { type: "earlier_node_fact", factKey: "ostrin_resin_stage" },
+    testimonyFrame: `I keep the gate when Quill sleeps, and that night neither of us slept at all. {{MARK_CLAUSE}} The barred east gate never opened, I'd stake my post on it. Orlan crossed my line of sight only once that night, laughing, heading for the ticket wagon, and I never saw him walk back out. Make of that what you will. I only watch. I don't judge. But I know where the last hand-lamp was burning, and I know who was standing under it.`,
+    truthfulVariants: [
+      {
+        mark: "NONE",
+        clause:
+          "I saw three things worth telling on the clock: the mist settle, the drum fall quiet at ten, and the lanterns die at half past. Separately — not a fourth anchor — the puppet-stage hand-lamp still burned long after. The strongman told his own story of a wrapped shape by the equipment yard; I saw that same shape too, and after the lanterns failed I saw it walk back toward the stage with the strings, not toward the fire pit at all.",
       },
     ],
     lyingVariants: [
       {
         mark: "RECKONING",
         clause:
-          "I saw the rain start and the puppet-stage lamp still burning — two sights only — and I swear the west gate opened a hand's width after midnight though the chain should have held.",
+          "I saw the mist settle and the lanterns die — two clock-bites only — and I swear the east gate opened a hand's width after midnight though the bar should have held.",
       },
       {
         mark: "CASEFILE",
         clause:
-          "I saw three things: the rain start, the generator die, and the puppet lamp. Afterward I undid the west-gate chain myself to check the road, then locked it again.",
+          "I saw three things: the mist settle, the drum fall quiet, and the lanterns die. Afterward I lifted the east-gate bar myself to check the road, then locked it again.",
       },
     ],
     nextHints: [
-      "Where the fest gathers to watch, applaud, and finally learn the truth. All roads on this journey end where the stage lights are brightest.",
+      "When the tents are done speaking, gather where the case is closed aloud — name the rope, the hand that held it, and the fact that fits.",
     ],
     decoyHints: {
       "The Crow's Nest": [
-        "I hum where no one lingers, tucked behind the building everyone walks past but never enters. Follow the sound, not the crowd.",
+        "Bold names, curfew hours, and paper that speaks for the building where residents sleep. Read the board, not the rumour.",
       ],
       "The Costume Trunk": [
-        "Rows of metal that arrived full of people and now stand empty, waiting for the day to end.",
+        "Not the threshold the crowd prefers — the quieter gate, the one fewer feet choose twice.",
       ],
       "The Silent Carousel": [
-        "Not far from minds that chase the grade,I sit in shade where worries fade.",
-        "No desk, no chalk, no clock to bind — Just rustling leaves to soothe your mind.",
+        "I hum where no one lingers, tucked behind the building everyone walks past. Follow the buzz, not the crowd.",
       ],
     },
     mirrorStyles: ["antonym", "negation"],

@@ -132,8 +132,8 @@ wrong verdict requires) is computed server-side by
 (derived from `teamCode` at registration). Two teams at the same tent will not
 share the same Truth/Lie answer or decoy target.
 
-The murderer is fixed as **Ostrin the Puppeteer** per the spec's default. His
-node never grants a suspect clearance regardless of verdict — that's
+The murderer is fixed as **Mr. Quill the Ticket Master** (second-run default).
+His node never grants a suspect clearance regardless of verdict — that's
 intentional, not a bug.
 
 ## Game logic notes
@@ -158,7 +158,7 @@ intentional, not a bug.
   verdicts at one node, further wrongs add an escalated **+10 min** fine
   (Carnival Tokens not built yet — mandatory token spend can replace this later).
 - **Accusation**: name an uncleared suspect, a method/weapon, and a Case File
-  keystone fact (seeded per team from Ostrin's truthful variant). Method and
+  keystone fact (seeded per team from Quill's truthful variant). Method and
   fact are graded by keyword token — wrong answers lower score for ranking but
   never block finish or the reveal. One sentence of reasoning is kept for human
   tie-breakers. The clock locks on submit; the reveal shows which of the three
@@ -197,20 +197,21 @@ intentional, not a bug.
 
 **Act I** (tents 1–3 / `sequenceIndex` 0–2) — easy / teaching
 
-- Marks I–III only in lying variants; no Mark IV; no Case Note dependencies;
-  `keySource: null`.
+- Marks I–III only in lying variants (Vireya / Kalo); no Mark IV; no Case Note
+  dependencies; `keySource: null`.
 - Correct verdict returns the **final** location riddle immediately (single-step).
-- Quill silently emits Case Note `quill_gate_chained` + cipher stamp `CHAIN`
-  for later tents (no extra player puzzle at Quill).
+- Quill: `truthPolicy: "fixed-true"` (murderer — always truthful, never clears);
+  silently emits Case Note `quill_east_barred` + cipher stamp `TICKET` for later
+  tents; accusation keystone seeded from his variant.
 - Intent: teach Marks and TRUTH/LIE routing without cross-tent homework.
 
 **Act II** (tents 4–6 / 3–5) — subtle + cross-reference
 
-- Bahri: Mark IV (Reckoning) on lies; volunteer/testimony cipher word `CINDER`; emits
-  `bahri_pit_bandage` + stamp `BANDAGE`.
-- Duran: requires Bahri Case Note; cipher key `BANDAGE`; emits
-  `duran_shed_shape` + stamp `SHED`.
-- Twins: require Quill Case Note; cipher key `CHAIN`.
+- Bahri: Mark IV (Reckoning) on lies; volunteer/testimony cipher word `EMBER`; emits
+  `bahri_ember_scar` + stamp `SCAR`.
+- Duran: requires Bahri Case Note; cipher key `SCAR`; emits
+  `duran_yard_shape` (fact only — no cipher stamp; Watchman unlocks with `WOOD`).
+- Twins: require Quill Case Note; cipher key `TICKET`.
 - Stage1 after verdict is **Caesar only** (no mirror on ciphertext) until Unlock;
   Midway advances only after a correct unlock.
 - Intent: cross-reference + on-site key; Mark IV is taught in the Case File,
@@ -218,13 +219,12 @@ intentional, not a bug.
 
 **Act III** (tents 7–8 / 6–7) — red herring + synthesis
 
-- Ostrin: `truthPolicy: "fixed-true"` (always truthful — red herring as the
-  murderer who never breaks a Mark); testimony/volunteer word `STRING`; emits
-  `ostrin_stage_lamp` + stamp `LAMP`.
-- Watchman: requires `duran_shed_shape` + `ostrin_stage_lamp`; cipher key
-  `LAMP`; can break Mark IV on lies.
+- Ostrin: seeded truth/lie (clearable red herring); testimony/volunteer word
+  `RESIN`; emits `ostrin_resin_stage` + stamp `WOOD`.
+- Watchman: requires `duran_yard_shape` + `ostrin_resin_stage`; cipher key
+  `WOOD`; can break Mark IV on lies.
 - Then Accusation (separate from riddle decode).
-- Intent: synthesis of Case Notes + cipher; Ostrin is the truthful trap.
+- Intent: synthesis of Case Notes + cipher; Quill remains the uncleared killer.
 
 ## Organiser admin
 

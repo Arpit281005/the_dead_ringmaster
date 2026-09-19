@@ -45,7 +45,8 @@ export default async function RulebookPage({
         At every tent: read the testimony, weigh it against the Marks, then declare{" "}
         <strong>THIS IS TRUTH</strong> or <strong>THIS IS A LIE</strong>. Judge correctly and the
         tent&apos;s riddle points you onward. Judge wrong, and you&apos;ll find a dead end instead —
-        costly, but not fatal. Your verdict locks the moment you submit it.
+        costly, but not fatal. After a wrong reading you may retry the same testimony once you have
+        followed the riddle to that dead end and scanned it.
       </div>
 
       <Link

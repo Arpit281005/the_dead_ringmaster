@@ -220,6 +220,19 @@ export async function scanNode(teamCode: string, rawToken: string): Promise<Acti
       };
     }
 
+    if (!lastVerdict!.riddleUnlocked) {
+      await prisma.scan.create({
+        data: { teamId: team.id, nodeId: node.id, wasValid: false, rejectionReason: "decoy-before-unlock" },
+      });
+      return {
+        ok: true,
+        data: {
+          valid: false,
+          reason: "Unlock the riddle first — then follow it to the dead end it names.",
+        },
+      };
+    }
+
     const existingDecoy = await prisma.scan.findFirst({
       where: {
         teamId: team.id,
@@ -682,7 +695,7 @@ export async function submitAccusation(
       suspectCorrect,
       methodCorrect,
       factCorrect,
-      murdererName: murderer?.name ?? "Ostrin",
+      murdererName: murderer?.name ?? "Mr. Quill",
       solutionText: SOLUTION_TEXT,
     },
   };

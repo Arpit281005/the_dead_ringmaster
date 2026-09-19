@@ -48,3 +48,51 @@ export async function grantEmittedFactsBeforeIndex(
 
   return granted;
 }
+
+/**
+ * Grant clearances that would have been issued by correct verdicts on tents
+ * [0, upToExclusive). Skips nodes with null clearReason (murderer / Watchman).
+ */
+export async function grantClearancesBeforeIndex(
+  teamId: string,
+  teamSeed: string,
+  upToExclusive: number
+): Promise<string[]> {
+  const decoys = await loadDecoyRefs();
+  const limit = Math.min(Math.max(0, upToExclusive), TOTAL_STORY_NODES);
+  const granted: string[] = [];
+
+  const nodes = await prisma.node.findMany({
+    where: {
+      isDecoy: false,
+      sequenceIndex: { gte: 0, lt: limit },
+      suspectId: { not: null },
+    },
+    select: { id: true, sequenceIndex: true, suspectId: true },
+  });
+  const byIndex = new Map(nodes.map((n) => [n.sequenceIndex, n]));
+
+  for (let i = 0; i < limit; i++) {
+    const resolved = resolveNodeContent(i, teamSeed, decoys);
+    if (!resolved.clearReason) continue;
+    const node = byIndex.get(i);
+    if (!node?.suspectId) continue;
+
+    const already = await prisma.clearance.findFirst({
+      where: { teamId, suspectId: node.suspectId },
+    });
+    if (already) continue;
+
+    await prisma.clearance.create({
+      data: {
+        teamId,
+        suspectId: node.suspectId,
+        nodeId: node.id,
+        reason: resolved.clearReason,
+      },
+    });
+    granted.push(node.suspectId);
+  }
+
+  return granted;
+}

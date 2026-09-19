@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { resolveNodeContent, type DecoyRef } from "@/lib/node-content";
+import { resolveNodeContent, ACCUSATION_NODE_INDEX, type DecoyRef } from "@/lib/node-content";
 import { STORY_TEMPLATES } from "@/lib/node-content/templates";
 import { TOTAL_STORY_NODES } from "@/lib/state";
 
@@ -73,7 +73,7 @@ export async function getAccusationReadiness(teamId: string, currentIndex: numbe
   });
 
   const decoys = await loadDecoyRefs();
-  const ostrin = resolveNodeContent(6, teamSeed, decoys);
+  const accusationSource = resolveNodeContent(ACCUSATION_NODE_INDEX, teamSeed, decoys);
 
   return {
     readyForAccusation: currentIndex >= TOTAL_STORY_NODES,
@@ -90,7 +90,7 @@ export async function getAccusationReadiness(teamId: string, currentIndex: numbe
           factKeywordSubmitted: accusation.factKeywordSubmitted,
         }
       : null,
-    expectedAccusationFactKeyword: ostrin.accusationFactKeyword,
+    expectedAccusationFactKeyword: accusationSource.accusationFactKeyword,
   };
 }
 

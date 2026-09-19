@@ -45,8 +45,8 @@ export default async function BoardPage({
       <main className="flex-1 px-5 py-8 max-w-2xl mx-auto w-full">
         <h1 className="font-display text-2xl font-black mb-1">The Deduction Board</h1>
         <p className="text-sm text-ink/60 mb-6">
-          {clearances.length} of {suspects.length} suspects cleared. One of the rest is lying about
-          murder.
+          {clearances.length} of {suspects.length} suspects cleared. One of the uncleared remains —
+          name them at the Accusation.
         </p>
 
         {facts.length > 0 && (

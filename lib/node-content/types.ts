@@ -9,7 +9,7 @@ export type MarkVariant = {
   /** Clause that plugs into the testimony frame (Mark-breaking when mark !== NONE). */
   clause: string;
   /**
-   * Ostrin (and future accusation sources): Case File keystone keyword the team
+   * Murderer / accusation sources: Case File keystone keyword the team
    * must cite at Accusation. Seeded with the variant; never sent to clients.
    */
   accusationFactKeyword?: string;
@@ -80,6 +80,6 @@ export type ResolvedNodeContent = {
   /** Resolved key string for encode/verify — never send to client. */
   cipherKey: string | null;
   keyPrompt: string | null;
-  /** Seeded Case File keystone for Accusation — Ostrin variants; server-only. */
+  /** Seeded Case File keystone for Accusation — murderer variants; server-only. */
   accusationFactKeyword: string | null;
 };
