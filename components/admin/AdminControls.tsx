@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   acknowledgeSecurityFlag,
   forceAdvanceTeam,
   repairTeamFacts,
   voidTeamPenalty,
+  deleteTeam,
   grantOrganiserHint,
   clearOrganiserHint,
   toggleGlobalPause,
@@ -82,9 +84,14 @@ export function TeamMutationPanel({
   teamCode: string;
   organiserHint: string | null;
 }) {
+  const router = useRouter();
   const [hint, setHint] = useState(organiserHint ?? "");
   const [msg, setMsg] = useState<string | null>(null);
+  const [confirmCode, setConfirmCode] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pending, start] = useTransition();
+
+  const canDelete = confirmCode.trim().toUpperCase() === teamCode.toUpperCase();
 
   return (
     <div className="flex flex-col gap-3 paper-card rounded-sm p-4">
@@ -151,6 +158,18 @@ export function TeamMutationPanel({
             Clear hint
           </button>
         )}
+        <button
+          type="button"
+          disabled={pending}
+          className="btn-gold-outline font-chrome uppercase text-xs px-3 py-2 rounded-sm border-oxblood text-oxblood"
+          onClick={() => {
+            setShowDeleteConfirm(true);
+            setConfirmCode("");
+            setMsg(null);
+          }}
+        >
+          Delete team
+        </button>
       </div>
       <div className="flex gap-2">
         <input
@@ -173,6 +192,58 @@ export function TeamMutationPanel({
           Grant
         </button>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="border border-oxblood/40 bg-oxblood/5 rounded-sm p-3 flex flex-col gap-2">
+          <p className="text-sm text-oxblood leading-relaxed">
+            Permanently delete team <strong>{teamCode}</strong> and all scans, verdicts, Case Notes,
+            clearances, devices, flags, and accusation. This cannot be undone.
+          </p>
+          <label className="text-xs text-ink/60">
+            Type the team code to confirm
+            <input
+              value={confirmCode}
+              onChange={(e) => setConfirmCode(e.target.value)}
+              className="mt-1 w-full border border-ink/30 bg-parchment px-2 py-2 rounded-sm text-sm font-chrome tracking-wide uppercase"
+              placeholder={teamCode}
+              autoCapitalize="characters"
+              autoCorrect="off"
+            />
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={pending}
+              className="btn-gold-outline font-chrome uppercase text-xs px-3 py-2 rounded-sm"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setConfirmCode("");
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={pending || !canDelete}
+              className="btn-oxblood font-chrome uppercase text-xs px-3 py-2 rounded-sm"
+              onClick={() =>
+                start(async () => {
+                  const r = await deleteTeam(teamCode);
+                  if (!r.ok) {
+                    setMsg(r.error);
+                    return;
+                  }
+                  router.push("/admin");
+                  router.refresh();
+                })
+              }
+            >
+              {pending ? "Deleting…" : "Delete forever"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {msg && <p className="text-sm text-ink/70">{msg}</p>}
     </div>
   );

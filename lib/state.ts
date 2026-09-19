@@ -110,7 +110,7 @@ export async function getNodeTestimony(teamCode: string, nodeId: string) {
 
 /**
  * Pending post-verdict riddle (survives Server Action revalidation).
- * Act I: plaintext already; Act II+: stage1 ciphertext until unlock.
+ * Act I: plaintext already; Act II+: empty until unlock (no ciphertext on client).
  */
 export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
   const team = await getTeamByCode(teamCode);
@@ -141,7 +141,7 @@ export async function getPendingRiddleUnlock(teamCode: string, nodeId: string) {
 
   return {
     wasCorrect: lastVerdict.wasCorrect,
-    riddle: stage1,
+    riddle: resolved.needsKey ? "" : stage1,
     needsKey: resolved.needsKey,
     keyPrompt: resolved.keyPrompt,
     clearedSuspectName,

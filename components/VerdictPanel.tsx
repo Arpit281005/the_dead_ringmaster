@@ -143,20 +143,18 @@ export default function VerdictPanel({
         </div>
 
         <div>
-          <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">
-            {showKeyGate
-              ? "Cipher (not plain English yet)"
-              : "The Riddle Reads"}
-          </p>
-          <p
-            className={
-              showKeyGate
-                ? "font-mono text-base leading-relaxed break-words tracking-wide text-ink/90"
-                : "font-display text-lg leading-snug break-words"
-            }
-          >
-            {displayRiddle}
-          </p>
+          {showKeyGate ? (
+            <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">
+              Unlock the riddle
+            </p>
+          ) : (
+            <>
+              <p className="font-chrome text-xs uppercase tracking-wide text-ink/50 mb-1">
+                The Riddle Reads
+              </p>
+              <p className="font-display text-lg leading-snug break-words">{displayRiddle}</p>
+            </>
+          )}
         </div>
 
         {showKeyGate && (

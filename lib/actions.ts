@@ -441,7 +441,8 @@ export async function submitVerdict(
     ok: true,
     data: {
       wasCorrect,
-      riddle,
+      // Act II+: withhold ciphertext until unlockRiddle returns plaintext.
+      riddle: resolved.needsKey ? "" : riddle,
       clearedSuspectName,
       advanced: false,
       huntComplete: false,

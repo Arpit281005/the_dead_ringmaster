@@ -123,6 +123,34 @@ export async function voidTeamPenalty(teamCode: string) {
   return { ok: true as const };
 }
 
+/** Permanently delete a team and every row tied to it. */
+export async function deleteTeam(teamCode: string) {
+  await requireAdmin();
+  const code = teamCode.toUpperCase();
+  const team = await prisma.team.findUnique({ where: { teamCode: code } });
+  if (!team) return { ok: false as const, error: "Team not found." };
+
+  const id = team.id;
+  await prisma.$transaction(async (tx) => {
+    await tx.adminAction.deleteMany({ where: { teamId: id } });
+    await tx.securityFlag.deleteMany({ where: { teamId: id } });
+    await tx.teamDevice.deleteMany({ where: { teamId: id } });
+    await tx.accusation.deleteMany({ where: { teamId: id } });
+    await tx.teamFact.deleteMany({ where: { teamId: id } });
+    await tx.teamNote.deleteMany({ where: { teamId: id } });
+    await tx.clearance.deleteMany({ where: { teamId: id } });
+    await tx.verdict.deleteMany({ where: { teamId: id } });
+    await tx.scan.deleteMany({ where: { teamId: id } });
+    await tx.team.delete({ where: { id } });
+  });
+
+  await logAction("DELETE_TEAM", { teamCode: team.teamCode, name: team.name }, null);
+  revalidatePath("/admin");
+  revalidatePath(`/admin/teams/${code}`);
+  revalidatePath(`/team/${code}`);
+  return { ok: true as const };
+}
+
 export async function grantOrganiserHint(teamCode: string, hint: string) {
   await requireAdmin();
   const team = await prisma.team.findUnique({ where: { teamCode: teamCode.toUpperCase() } });
